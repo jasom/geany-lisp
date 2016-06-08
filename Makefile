@@ -1,5 +1,5 @@
 all: tup.config
-	tup
+	sh build.sh
 
 tup.config:
 	sh config.sh
