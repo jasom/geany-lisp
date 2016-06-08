@@ -4,3 +4,6 @@ all: tup.config
 tup.config:
 	sh config.sh
 
+install: all
+	sh install.sh
+
