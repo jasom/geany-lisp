@@ -1,0 +1,3 @@
+TOP=$(TUP_CWD)
+!varsed = |> tup varsed %f %o |> %B
+.gitignore

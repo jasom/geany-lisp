@@ -1,0 +1,14 @@
+#!/bin/sh
+NL='
+'
+
+#set -x
+INPUT="$(sed 's/"/\\"/g')"
+printf 'INPUT:\n%s\nENDINPUT' "$INPUT" > /tmp/lispindent.log
+OUTPUT="$(emacsclient -s slime-server -e '(ss-indent-lisp-string "'"${INPUT}"'")' |
+sed '
+s/^\n/\'"$NL"'/g
+s/\([^\\]\)\\n/\1\'"$NL"'/g')"
+
+printf 'OUTPUT:\n%s\nENDOUTPUT' "$OUTPUT" >> /tmp/lispindent.log
+printf "%s\n" "$OUTPUT"

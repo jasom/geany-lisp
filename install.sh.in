@@ -1,0 +1,8 @@
+EXECUTABLES="lispindent lispcomplete"
+PLUGINS=geany-plugin/*.so
+
+mkdir -p "@INSTALL_DIR@"
+mkdir -p "@GEANY_PLUGIN_DIR@"
+
+cp $EXECUTABLES "@INSTALL_DIR@"
+cp $PLUGINS "@GEANY_PLUGIN_DIR@"
