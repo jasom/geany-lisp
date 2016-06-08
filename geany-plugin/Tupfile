@@ -2,4 +2,7 @@ include_rules
 
 include $(TOP)/includeme.tup
 
-: *.c |> gcc -Wall -Wextra -o %o -shared -fPIC %f `pkg-config --cflags geany` |> %B.so
+CFLAGS=@(CFLAGS) -Wall -Wextra -Werror -shared -fPIC `pkg-config --cflags geany`
+
+: foreach *.c | local.h |> gcc $(CFLAGS) -c -o %o %f |> %B.o
+: *.o |> gcc $(CFLAGS) -o %o %f |> glisp.so
