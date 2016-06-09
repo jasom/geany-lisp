@@ -12,3 +12,5 @@ extern GeanyFunctions  *geany_functions;
 void glisp_kb_run_lisp_complete(G_GNUC_UNUSED guint key_id);
 gint glisp_get_paren_indent(ScintillaObject *sci, gint line);
 gint glisp_setup_pipe(const char *program, int *pipefd, FILE **outf, int *outpid);
+void glisp_indent_charadded_cb(GeanyEditor *ed, SCNotification *nt, gint pos);
+void glisp_completions_charadded_cb(GeanyEditor *ed, SCNotification *nt, gint position);

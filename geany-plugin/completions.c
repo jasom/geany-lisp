@@ -1,5 +1,32 @@
 #include "local.h"
 
+static void complete_at_position(ScintillaObject *sci, gint pos);
+
+void glisp_completions_charadded_cb(GeanyEditor *ed, SCNotification *nt, gint position)
+{
+    static gint first,last;
+
+    if(strchr(" \"\t\n()#;",nt->ch)) {
+        first=-2;
+        last=-2;
+        return;
+    }
+
+    if(position != last +1) {
+        first=position;
+        last=position;
+        return;
+    }
+    else {
+        last++;
+    }
+    if(last-first > 3) {
+        complete_at_position(ed->sci,position);
+    }
+
+}
+
+
 static gchar *read_to_end_of_file(FILE *f)
 {
     long start = ftell(f);
@@ -25,7 +52,7 @@ static gchar *read_to_end_of_file(FILE *f)
     return buf;
 }
 
-static void get_completions(ScintillaObject *sci, long *backtrack, gchar **partial, gchar**completions) 
+static void get_completions(ScintillaObject *sci, gint pos, long *backtrack, gchar **partial, gchar**completions) 
 {
     int pipefd;
     int pid;
@@ -34,7 +61,6 @@ static void get_completions(ScintillaObject *sci, long *backtrack, gchar **parti
     FILE *outfile=NULL;
     gchar *line_buf = NULL;
 
-    gint pos = sci_get_current_position(sci);
 
     *completions=NULL;
     *backtrack=0;
@@ -92,22 +118,26 @@ error:
     return;
 }
 
-void glisp_kb_run_lisp_complete(G_GNUC_UNUSED guint key_id)
+
+static void complete_at_position(ScintillaObject *sci, gint pos)
 {
-    GeanyDocument* doc = document_get_current();
-    GeanyEditor* editor;
-    ScintillaObject *sci;
     long rootlen;
     gchar *partial;
     gchar *completions;
+    gint lexer,style;
 
-    if(!doc || !doc->editor || ! doc->editor->sci) {
+    if(pos<2) {
         return;
     }
-    editor = doc->editor;
-    sci = editor->sci;
 
-    get_completions(sci, &rootlen, &partial, &completions);
+    lexer = sci_get_lexer(sci);
+    style = sci_get_style_at(sci,pos-2);
+
+    if(!highlighting_is_code_style(lexer,style)) {
+        return;
+    }
+
+    get_completions(sci, pos, &rootlen, &partial, &completions);
 
     if (completions == NULL) goto error;
 
@@ -122,3 +152,19 @@ error:
     if(partial != NULL) g_free(partial);
 }
 
+
+void glisp_kb_run_lisp_complete(G_GNUC_UNUSED guint key_id)
+{
+    GeanyDocument* doc = document_get_current();
+    GeanyEditor* editor;
+    ScintillaObject *sci;
+
+    if(!doc || !doc->editor || ! doc->editor->sci) {
+        return;
+    }
+    editor = doc->editor;
+    sci = editor->sci;
+
+    gint position=sci_get_current_position(sci);
+    complete_at_position(sci,position);
+}

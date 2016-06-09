@@ -5,7 +5,7 @@ GeanyData       *geany_data;
 GeanyFunctions  *geany_functions;
 
 PLUGIN_VERSION_CHECK(211)
-PLUGIN_SET_INFO("Lisp Indenting", "Lisp Indentation",
+PLUGIN_SET_INFO("Lisp Development", "Lisp Development",
                 "1.0", "John Doe <john.doe@example.org>");
 PLUGIN_KEY_GROUP(lisp, 1);
 //static GtkWidget *main_menu_item = NULL;
@@ -70,31 +70,11 @@ error0:
 
 static void charadded_cb(GeanyEditor *ed, SCNotification *nt)
 {
-    //dialogs_show_msgbox(GTK_MESSAGE_INFO, "Char: %d",nt->ch);
-    
-    long charAddedAt;
-    switch(nt->ch) {
-        case '\n':
-            charAddedAt=scintilla_send_message(ed->sci,SCI_GETCURRENTPOS,0,0);
-            {
-                long level;
-                int line;
-                int position;
-
-                position=charAddedAt;
-                line=scintilla_send_message(ed->sci,SCI_LINEFROMPOSITION,
-                        position,0);
-                level = glisp_get_paren_indent(ed->sci,line-1);
-                //fprintf(stderr,"Indent: %d\n",moreindent);
-                fprintf(stderr,"Level: %ld\n",level);
-                scintilla_send_message(ed->sci,SCI_SETLINEINDENTATION,line,level);
-                scintilla_send_message(ed->sci,SCI_GOTOPOS,
-                        scintilla_send_message(ed->sci,SCI_GETLINEINDENTPOSITION,line,0),0);
-
-            }
-            break;
-    }
+    gint position=sci_get_current_position(ed->sci);
+    glisp_indent_charadded_cb(ed,nt,position);
+    glisp_completions_charadded_cb(ed,nt,position);
 }
+
 
 
 static gboolean notify_cb(G_GNUC_UNUSED GObject *obj, GeanyEditor *ed, SCNotification *nt, G_GNUC_UNUSED gpointer user_data)

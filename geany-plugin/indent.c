@@ -8,6 +8,29 @@ gint glisp_get_paren_indent(ScintillaObject *sci, gint line)
     return get_indent_for_line(sci, 0, line+1);
 }
 
+void glisp_indent_charadded_cb(GeanyEditor *ed, SCNotification *nt, gint position)
+{
+    //dialogs_show_msgbox(GTK_MESSAGE_INFO, "Char: %d",nt->ch);
+    
+    switch(nt->ch) {
+        case '\n':
+            {
+                long level;
+                int line;
+
+                line=sci_get_line_from_position(ed->sci,position);
+                level = glisp_get_paren_indent(ed->sci,line-1);
+                //fprintf(stderr,"Indent: %d\n",moreindent);
+                fprintf(stderr,"Level: %ld\n",level);
+                scintilla_send_message(ed->sci,SCI_SETLINEINDENTATION,line,level);
+                scintilla_send_message(ed->sci,SCI_GOTOPOS,
+                        scintilla_send_message(ed->sci,SCI_GETLINEINDENTPOSITION,line,0),0);
+
+            }
+            break;
+    }
+}
+
 static gint get_indent_for_line(ScintillaObject *sci, gint start, gint end)
 {
     int pipefd;
