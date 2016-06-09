@@ -1,5 +1,6 @@
 (load (expand-file-name "~/quicklisp/slime-helper.el"))
 
+(setq-default indent-tabs-mode nil)
 
 (setq ss-bootstrap-string
 "
@@ -41,7 +42,8 @@
       (set (make-local-variable 'indent-line-function)
 	   'lisp-indent-line)
       (insert str)
-      (indent-region 0 (point-max))
+      (goto-char (point-max))
+      (lisp-indent-line)
       (buffer-string))))
 
 (defun ss-complete-lisp-symbol (str)
