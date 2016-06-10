@@ -71,7 +71,14 @@
       (ss-setup-buffer)
       (slime-eval `(cl-user::ssh-simple-eval ,str)))))
 
-
-
-
-
+(defun ss-find-definitions (name)
+  (let ((dfns (slime-find-definitions name))
+	(result nil))
+    (apply 'concat
+	   (mapcar (lambda (x) (format "%S\n" x))
+		(when dfns
+		  (dolist (elt dfns (reverse result))
+		    (let ((location (cdr (assoc :location (cdr elt)))))
+		      (push (car elt) result)
+		      (push (cadr (assoc :file location)) result)
+		      (push (cadr (assoc :position location)) result))))))))

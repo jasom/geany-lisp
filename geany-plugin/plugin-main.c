@@ -7,7 +7,7 @@ GeanyFunctions  *geany_functions;
 PLUGIN_VERSION_CHECK(211)
 PLUGIN_SET_INFO("Lisp Development", "Lisp Development",
                 "1.0", "John Doe <john.doe@example.org>");
-PLUGIN_KEY_GROUP(lisp, 1);
+PLUGIN_KEY_GROUP(lisp, 2);
 //static GtkWidget *main_menu_item = NULL;
 
 static gboolean notify_cb(GObject *obj, GeanyEditor *ed, SCNotification *nt, gpointer user_data);
@@ -25,6 +25,7 @@ gint glisp_setup_pipe(const char *program, int *pipefd, FILE **outf, int *outpid
     int pipefds[2] = {0};
     int pid;
 
+    /* change to g_file_open_tmp */
     FILE *outfile = tmpfile();
 
     if(outfile == NULL) {
@@ -45,7 +46,7 @@ gint glisp_setup_pipe(const char *program, int *pipefd, FILE **outf, int *outpid
         dup2(pipefds[0], 0);
         close(pipefds[1]);
         dup2(fileno(outfile),1);
-        execl(program,"",NULL);
+        execl(program,program,NULL);
         fprintf(stderr,"%s\n",program);
         perror("Error launching external program");
         exit(1);
@@ -96,6 +97,8 @@ void plugin_init(G_GNUC_UNUSED GeanyData *data)
 {
     keybindings_set_item(plugin_key_group, 0, glisp_kb_run_lisp_complete,
             0, 0, "run_lisp_complete", "Complete lisp symbol", NULL);
+    keybindings_set_item(plugin_key_group, 1, glisp_kb_run_lisp_jump,
+            0, 0, "run_lisp_jump", "Jump to Lisp definition", NULL);
 }
 void plugin_cleanup(void)
 {
