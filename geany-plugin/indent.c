@@ -1,11 +1,11 @@
 #include "local.h"
 
-static gint get_indent_for_line(ScintillaObject *sci, gint start, gint end);
-static gint get_whitespace_start(gchar *line);
+static gint getIndentForLine(ScintillaObject *sci, gint start, gint end);
+static gint getWhitespaceStart(gchar *line);
 
 gint glisp_get_paren_indent(ScintillaObject *sci, gint line)
 {
-    return get_indent_for_line(sci, 0, line+1);
+    return getIndentForLine(sci, 0, line+1);
 }
 
 void glisp_indent_charadded_cb(GeanyEditor *ed, SCNotification *nt, gint position)
@@ -30,82 +30,109 @@ void glisp_indent_charadded_cb(GeanyEditor *ed, SCNotification *nt, gint positio
             break;
     }
 }
+struct indentCbData {
+    gint position;
+    gint end;
+    ScintillaObject *sci;
+    gint indentLevel;
+};
 
-static gint get_indent_for_line(ScintillaObject *sci, gint start, gint end)
+static gboolean stdinCb(GIOChannel *source, GIOCondition condition, struct indentCbData *data)
 {
-    int pipefd;
-    int pid;
-    gint i;
-    size_t n = 0;
-
-    FILE *outfile=NULL;
-    gchar *line_buf = NULL;
-
-    if(glisp_setup_pipe(GLISP_TOOLS_BASE "/lispindent", &pipefd, &outfile, &pid)) {
-        fprintf(stderr,"Unable to run lispindent\n");
-        return 0;
-    }
+    gboolean returnvalue=TRUE;
+    GError *E=NULL;
+    char *line_buf=NULL;
+    if(condition == G_IO_OUT) {
+        gsize bytes_written;
+        gsize len;
 
 
-    for(i=start;i<end;++i)
-    {
-        line_buf = sci_get_line(sci, i);
-        if(line_buf == NULL) {
-            goto error;
+        if(data->position >= data->end) {
+            line_buf=malloc(2);
+            strcpy(line_buf,"X");
+            returnvalue=FALSE;
         }
-        write(pipefd, line_buf, strlen(line_buf));
-        g_free(line_buf);
-        line_buf = NULL;
-    }
-    write(pipefd,"X\n", 2);
+        else {
+            line_buf = sci_get_line(data->sci, data->position);
+        }
 
-    close(pipefd);
-    //TODO check for success
-    waitpid(pid,NULL,0);
+        len=strlen(line_buf);
 
-    fflush(outfile);
-    fseek(outfile,0,SEEK_SET);
-
-    for(i=start;i<end-1;++i) {
-        getline(&line_buf, &n, outfile);
-        fprintf(stderr,"LINE: %s\n",line_buf);
-        free(line_buf);
-        line_buf = NULL;
-        n=0;
-    }
-
-    {
-        gint prev_indent;
-        gint new_indent;
-
-        getline(&line_buf, &n, outfile);
-        fprintf(stderr,"LINE: %s\n",line_buf);
-        prev_indent = get_whitespace_start(line_buf);
-
-        free(line_buf);
-        line_buf = NULL;
-        n=0;
-
-        getline(&line_buf, &n, outfile);
-        new_indent = get_whitespace_start(line_buf);
-
-        free(line_buf);
-        line_buf = NULL;
-        n=0;
-
-        return scintilla_send_message(sci, SCI_GETLINEINDENTATION,end-1,0) + (new_indent - prev_indent);
+        g_io_channel_write_chars(source,line_buf,len,
+                &bytes_written,&E);
+        g_assert(bytes_written == len);
+        if(E != NULL) {
+            fprintf(stderr,"Error writing to indenter: %s\n",E->message);
+            returnvalue=FALSE;
+            goto cleanup;
+        }
+        data->position++;
+    } else if (condition == G_IO_ERR ||
+            condition == G_IO_HUP ||
+            condition == G_IO_NVAL) {
+        fprintf(stderr,"Indentor closed stdin prematurely\n");
+        returnvalue = FALSE;
+        goto cleanup;
     }
 
-error:
-    if(line_buf != NULL) {
-        g_free(line_buf);
-    }
-    close(pipefd);
-    fclose(outfile);
-    return 0;
+cleanup:
+    g_clear_error(&E);
+    free(line_buf);
+    return returnvalue;
 }
 
-static gint get_whitespace_start(gchar *line)
+static void stdoutCb(GString *instring, GIOCondition condition, struct indentCbData *data)
+{
+    if (condition & (G_IO_IN | G_IO_PRI)) {
+        if(data->position < data->end-1) {
+            //empty
+        } else if(data->position == data->end-1) {
+            fprintf(stderr,"LINE: %s\n",instring->str);
+            data->indentLevel = getWhitespaceStart(instring->str);
+        } else if(data->position == data->end) {
+            fprintf(stderr,"LINE: %s\n",instring->str);
+            data->indentLevel = getWhitespaceStart(instring->str) - data->indentLevel;
+        }
+        data->position++;
+    }
+}
+
+static gint getIndentForLine(ScintillaObject *sci, gint start, gint end)
+{
+    GError *E=NULL;
+    gint result=0;
+    gchar *argv[2] = {GLISP_TOOLS_BASE "/lispindent" , NULL};
+    struct indentCbData *data = g_malloc(sizeof(struct indentCbData) *2);
+
+    data[0].position=start;
+    data[0].end=end;
+    data[0].sci=sci;
+    data[1].position=start;
+    data[1].end=end;
+    data[1].sci=sci;
+
+    if (! spawn_with_callbacks(NULL,NULL,argv,NULL,SPAWN_SYNC,
+            (GIOFunc)stdinCb,&data[0],
+            (SpawnReadFunc)stdoutCb,&data[1],0,
+            NULL,NULL,0,
+            NULL,NULL,
+            NULL,
+            &E)) {
+
+        g_assert(E);
+        fprintf(stderr, "Unable to run definitionjump: %s\n",E->message);
+        goto error;
+    }
+
+    result =  scintilla_send_message(sci, SCI_GETLINEINDENTATION,end-1,0) + data[1].indentLevel;
+
+error:
+    g_clear_error(&E);
+    g_free(data);
+    return result;
+}
+
+static gint getWhitespaceStart(gchar *line)
 {
     gint position = 0;
     int i;
