@@ -1,0 +1,7 @@
+#!/bin/sh
+UNESCAPE="$(dirname "$0")/unescape"
+GET_LINENUMBER="$(dirname  "$0")/positiontolinenumber"
+ITEMS="$(emacsclient -s slime-server -e '(ss-find-definitions "'"${1}"'")'|sed 's/^"//;s/"$//' | "$UNESCAPE" |tr '\n' ' ')"
+#printf '%s\n' "$ITEMS"
+#printf '%q\n' "$ITEMS"
+eval "for item in $ITEMS; do echo \$item; done"

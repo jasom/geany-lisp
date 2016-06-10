@@ -1,8 +1,11 @@
-EXECUTABLES="lispindent lispcomplete lispcompileload"
+UTILITIES="$(echo utilities/[!T]*)"
 PLUGINS=geany-plugin/*.so
 
 mkdir -p "@INSTALL_DIR@"
 mkdir -p "@GEANY_PLUGIN_DIR@"
 
-cp $EXECUTABLES "@INSTALL_DIR@"
+for utility in $UTILITIES; do
+    cp $utility "@INSTALL_DIR@"
+    chmod +x "@INSTALL_DIR@/$(basename $utility)"
+done
 cp $PLUGINS "@GEANY_PLUGIN_DIR@"

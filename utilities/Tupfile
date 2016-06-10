@@ -1,0 +1,1 @@
+:foreach ../utilities-src/*.c |> gcc @(CFLAGS) %f -o %o |> %B

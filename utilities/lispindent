@@ -1,13 +1,15 @@
 #!/bin/sh
+UNESCAPE="$(dirname $0)/unescape"
 NL='
 '
 
 #set -x
 INPUT="$(sed 's/["\\]/\\&/g')"
 printf 'INPUT:\n%s\nENDINPUT' "$INPUT" > /tmp/lispindent.log
-OUTPUT="$(printf '%b' "$(emacsclient -s slime-server -e '(ss-indent-lisp-string "'"${INPUT}"'")' |
+OUTPUT="$(emacsclient -s slime-server -e '(ss-indent-lisp-string "'"${INPUT}"'")' |
 sed '
-s/^"//;s/"$//')")"
+s/^"//;s/"$//' |
+"$UNESCAPE")"
 
 printf 'OUTPUT:\n%s\nENDOUTPUT' "$OUTPUT" >> /tmp/lispindent.log
 printf "%s\n" "$OUTPUT"
