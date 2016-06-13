@@ -25,11 +25,6 @@ static void deleteSymbolLocation(SymbolLocation *s)
     g_free(s);
 }
 
-static void g_string_destroy(GString *s)
-{
-    if(s != NULL) g_string_free(s,TRUE);
-}
-
 static gboolean readSymbolLocation(GPtrArray *input, guint *idx, GPtrArray *output)
 {
     SymbolLocation *s = newSymbolLocation();
@@ -282,7 +277,7 @@ static void read_current_word(GeanyEditor *editor, gint pos, gchar *word, gsize 
     g_free(chunk);
 }
 
-const char *lispWordChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijlkmnopqrstuvwxyz1234567890*&^%$@!-_+=:";
+const char *lispWordChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijlkmnopqrstuvwxyz1234567890*&^%$@!-_+=:/?<>";
 
 static void goToFilePosition(gchar *filename, gsize position)
 {
@@ -301,16 +296,6 @@ static void goToFilePosition(gchar *filename, gsize position)
         gint lineno=sci_get_line_from_position(new_doc->editor->sci, position) + 1;
 
         navqueue_goto_line(old_doc, new_doc, lineno);
-    }
-}
-
-static void slurp_cb(GString *instring, GIOCondition condition, GPtrArray *accum)
-{
-    if (condition & (G_IO_IN | G_IO_PRI)) {
-        // I think line buffered means call this once per line
-        g_assert (instring->str[instring->len-1] == '\n');
-        GString *line = g_string_new_len(instring->str,instring->len-1); //Strip newline
-        g_ptr_array_add(accum,line);
     }
 }
 
@@ -351,13 +336,13 @@ static void exit_cb(G_GNUC_UNUSED GPid pid, gint status, GPtrArray *stdout_lines
     }
     
 cleanup:
-    g_error_free(E);
+    g_clear_error(&E);
     g_ptr_array_free(results,TRUE);
     g_ptr_array_free(stdout_lines,TRUE);
 }
 
     
-void glisp_kb_run_lisp_jump(G_GNUC_UNUSED guint key_id)
+void glispKbRunJump(G_GNUC_UNUSED guint key_id)
 {
     GeanyDocument* doc = document_get_current();
     GeanyEditor* editor;
@@ -365,7 +350,7 @@ void glisp_kb_run_lisp_jump(G_GNUC_UNUSED guint key_id)
     G_GNUC_UNUSED ScintillaObject *sci;
     const gint BUF_SIZE=1024;
     char *argv[3] = {0};
-    GPtrArray *inputBuffer = g_ptr_array_new_with_free_func((GDestroyNotify)g_string_destroy);
+    GPtrArray *inputBuffer = g_ptr_array_new_with_free_func((GDestroyNotify)glispStringDestroy);
 
 
     gchar *buffer =g_malloc(BUF_SIZE);
@@ -384,7 +369,7 @@ void glisp_kb_run_lisp_jump(G_GNUC_UNUSED guint key_id)
 
     if (! spawn_with_callbacks(NULL,NULL,argv,NULL,0,
             NULL,NULL,
-            (SpawnReadFunc)slurp_cb,inputBuffer,0,
+            (SpawnReadFunc)glispSlurpCb,inputBuffer,0,
             NULL,NULL,0,
             (GChildWatchFunc)exit_cb,inputBuffer,
             NULL,
@@ -397,7 +382,7 @@ void glisp_kb_run_lisp_jump(G_GNUC_UNUSED guint key_id)
     return;
 
 error:
-    g_error_free(E);
+    g_clear_error(&E);
     g_ptr_array_free(inputBuffer,TRUE);
 
 

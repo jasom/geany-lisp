@@ -2,7 +2,7 @@
 
 static void complete_at_position(ScintillaObject *sci, gint pos);
 
-void glisp_completions_charadded_cb(GeanyEditor *ed, SCNotification *nt, gint position)
+void glispCompletionsCharaddedCb(GeanyEditor *ed, SCNotification *nt, gint position)
 {
     static gint first,last;
 
@@ -26,95 +26,101 @@ void glisp_completions_charadded_cb(GeanyEditor *ed, SCNotification *nt, gint po
 
 }
 
+struct stdinData {
+    char *p;
+    gsize len;
+    gsize offset;
+};
 
-static gchar *read_to_end_of_file(FILE *f)
+static gboolean stdinCb(GIOChannel *source, GIOCondition condition, struct stdinData *data)
 {
-    long start = ftell(f);
-    long end;
-    gchar *buf=NULL;
+    gboolean returnvalue=TRUE;
+    GError *E=NULL;
+    if(condition == G_IO_OUT) {
+        gsize bytes_written=0;
+        if (data->offset >= data->len) {
+            returnvalue=FALSE;
+        } else {
 
-    fseek(f, 0L, SEEK_END);
-
-    end = ftell(f);
-
-    fseek(f, start, SEEK_SET);
-
-    buf = g_malloc0(1+end-start);
-
-    if(buf != NULL) {
-        size_t bytes_read = fread(buf,1,end-start,f);
-        if(bytes_read != (unsigned long)end-start) {
-            g_free(buf);
-            return NULL;
+            g_io_channel_write_chars(source,
+                    data->p + data->offset,
+                    data->len - data->offset,
+                    &bytes_written,&E);
+            if(E != NULL) {
+                fprintf(stderr,"Error writing to indenter: %s\n",E->message);
+                returnvalue=FALSE;
+                goto cleanup;
+            }
+            data->offset+=bytes_written;
         }
+    } else if (condition == G_IO_ERR ||
+            condition == G_IO_HUP ||
+            condition == G_IO_NVAL) {
+        fprintf(stderr,"Completions closed stdin prematurely\n");
+        returnvalue = FALSE;
+        goto cleanup;
     }
 
-    return buf;
+cleanup:
+    g_clear_error(&E);
+    return returnvalue;
 }
 
 static void get_completions(ScintillaObject *sci, gint pos, long *backtrack, gchar **partial, gchar**completions) 
 {
-    int pipefd;
-    int pid;
-    size_t n = 0;
-
-    FILE *outfile=NULL;
-    gchar *line_buf = NULL;
-
+    struct stdinData stdinData = {0};
+    GPtrArray *inputBuffer = g_ptr_array_new_with_free_func((GDestroyNotify)glispStringDestroy);
+    GError *E=NULL;
+    GString *tmp=NULL;
+    gchar *argv[2] = {GLISP_TOOLS_BASE "/lispcomplete" , NULL};
+    gsize i;
+    GString *output=NULL;
 
     *completions=NULL;
     *backtrack=0;
     *partial=NULL;
 
-    if(glisp_setup_pipe(GLISP_TOOLS_BASE "/lispcomplete", &pipefd, &outfile, &pid)) {
-        fprintf(stderr,"Unable to run lispcomplete\n");
-        return;
+    stdinData.p = sci_get_contents_range(sci,0,pos);
+
+    if(stdinData.p == NULL) {
+        goto cleanup;
     }
 
-    //Todo if pos is large, chunk this
-    line_buf = sci_get_contents_range(sci,0,pos);
+    stdinData.len=strlen(stdinData.p);
 
-    if(line_buf == NULL) {
-        goto error;
+    if (! spawn_with_callbacks(NULL,NULL,argv,NULL,SPAWN_SYNC,
+            (GIOFunc)stdinCb,&stdinData,
+            (SpawnReadFunc)glispSlurpCb,inputBuffer,0,
+            NULL,NULL,0,
+            NULL,NULL,
+            NULL,
+            &E))
+
+    if(inputBuffer->len <  3) {
+        goto cleanup;
     }
 
-    write(pipefd,line_buf,strlen(line_buf));
-
-    g_free(line_buf);
-    line_buf = NULL;
-
-    close(pipefd);
-    //TODO check for success
-    waitpid(pid,NULL,0);
-
-    fflush(outfile);
-    fseek(outfile,0,SEEK_SET);
-
-    getline(&line_buf, &n, outfile);
-    if(line_buf == NULL) {
-        goto error;
-    }
+    // No errors after this point
     
-    *backtrack = strtol(line_buf,NULL,10);
-    g_free(line_buf);
-    line_buf=NULL;
+    tmp=g_ptr_array_index(inputBuffer,0);
+    *backtrack = g_ascii_strtoull(tmp->str,NULL,10);
 
-    getline(&line_buf, &n, outfile);
-    if(line_buf == NULL) {
-        goto error;
+    tmp=g_ptr_array_index(inputBuffer,1);
+    *partial=g_string_free(tmp,FALSE);
+    //Take ownership of string from array
+    g_ptr_array_index(inputBuffer,1)=NULL;
+
+    output = g_string_sized_new(1024);
+    for(i=2;i<inputBuffer->len;++i) {
+        tmp=g_ptr_array_index(inputBuffer,i);
+        g_string_append(output,tmp->str);
+        g_string_append_c(output,'\n');
     }
+    *completions = g_string_free(output,FALSE);
 
-    *partial=line_buf;
-    line_buf=NULL;
-
-    *completions = read_to_end_of_file(outfile);
-
-error:
-    if(line_buf != NULL) {
-        g_free(line_buf);
-    }
-    close(pipefd);
-    fclose(outfile);
+cleanup:
+    g_clear_error(&E);
+    g_ptr_array_free(inputBuffer,TRUE);
     return;
 }
 
@@ -153,7 +159,7 @@ error:
 }
 
 
-void glisp_kb_run_lisp_complete(G_GNUC_UNUSED guint key_id)
+void glispKbRunComplete(G_GNUC_UNUSED guint key_id)
 {
     GeanyDocument* doc = document_get_current();
     GeanyEditor* editor;

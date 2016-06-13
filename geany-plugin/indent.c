@@ -3,12 +3,12 @@
 static gint getIndentForLine(ScintillaObject *sci, gint start, gint end);
 static gint getWhitespaceStart(gchar *line);
 
-gint glisp_get_paren_indent(ScintillaObject *sci, gint line)
+static gint glisp_get_paren_indent(ScintillaObject *sci, gint line)
 {
     return getIndentForLine(sci, 0, line+1);
 }
 
-void glisp_indent_charadded_cb(GeanyEditor *ed, SCNotification *nt, gint position)
+void glispIndentCharaddedCb(GeanyEditor *ed, SCNotification *nt, gint position)
 {
     //dialogs_show_msgbox(GTK_MESSAGE_INFO, "Char: %d",nt->ch);
     
