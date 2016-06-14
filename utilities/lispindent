@@ -1,5 +1,5 @@
 #!/bin/sh
-UNESCAPE="$(dirname $0)/unescape"
+UNESCAPE="$(dirname $0)/string.awk"
 NL='
 '
 
@@ -7,9 +7,7 @@ NL='
 INPUT="$(sed 's/["\\]/\\&/g')"
 printf 'INPUT:\n%s\nENDINPUT' "$INPUT" > /tmp/lispindent.log
 OUTPUT="$(emacsclient -s "$GLISP_EMACSID" -e '(ss-indent-lisp-string "'"${INPUT}"'")' |
-sed '
-s/^"//;s/"$//' |
-"$UNESCAPE")"
+awk -f "$UNESCAPE")"
 
 printf 'OUTPUT:\n%s\nENDOUTPUT' "$OUTPUT" >> /tmp/lispindent.log
 printf "%s\n" "$OUTPUT"
