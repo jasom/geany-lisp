@@ -1,0 +1,47 @@
+Geany Development Plugin for Common Lisp
+========================================
+
+**This is still very pre-alpha.  Use at your own risk**
+
+Requirements
+------------
+
+* Linux (may work on other \*nix, but is untested)
+* `geany <http://geany.org>`_ the oldest version I've tested with is 1.25
+* you will need the plugin-dev headers for the above as well.
+* GNU Emacs
+* Quicklisp installed in default location ($HOME/quicklisp)
+* Quicklisp slime helper installed on the above quicklisp
+
+Installing
+----------
+
+* ``PREFIX=$HOME sh config.sh; make install``
+* Select the plugin from the geany plugin manager
+* Configure keybindings from the geany plugin manager
+* If you wish the "Compile" command to work, copy the ``filetypes.lisp`` to ``~/.config/geany/filedefs`` I don't install this by default so as to not clobber any existing customizations that may already be there.
+* 
+
+Current Features
+----------------
+
+* Jump to symbol definition
+* Smart indenting
+* Compile current file
+* Completion of symbols
+
+
+Known Bugs
+----------
+
+* Tabstop for indentation is hard-coded to 8.  It is strongly recommended that you configure geany to use spaces only for indentation for the time being.
+   * Note that geany autodetects indentation, so if you open up a file with tabs it may locally use tabs for indentation
+   * You can select "Project->Apply default indentation" to set the local file's indentation to be the same as your project's settings.
+* The lisp server does not start up when a new project is created.
+
+  * Either restart geany or close and reopen the project
+
+Unknown Bugs
+------------
+
+Probably a lot.
