@@ -6,7 +6,7 @@ NL='
 #set -x
 INPUT="$(sed 's/["\\]/\\&/g')"
 printf 'INPUT:\n%s\nENDINPUT' "$INPUT" > /tmp/lispindent.log
-OUTPUT="$(emacsclient -s slime-server -e '(ss-indent-lisp-string "'"${INPUT}"'")' |
+OUTPUT="$(emacsclient -s "$GLISP_EMACSID" -e '(ss-indent-lisp-string "'"${INPUT}"'")' |
 sed '
 s/^"//;s/"$//' |
 "$UNESCAPE")"

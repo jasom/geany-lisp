@@ -87,10 +87,10 @@ static void stdoutCb(GString *instring, GIOCondition condition, struct indentCbD
         if(data->position < data->end-1) {
             //empty
         } else if(data->position == data->end-1) {
-            fprintf(stderr,"LINE: %s\n",instring->str);
+            //fprintf(stderr,"LINE: %s\n",instring->str);
             data->indentLevel = getWhitespaceStart(instring->str);
         } else if(data->position == data->end) {
-            fprintf(stderr,"LINE: %s\n",instring->str);
+            //fprintf(stderr,"LINE: %s\n",instring->str);
             data->indentLevel = getWhitespaceStart(instring->str) - data->indentLevel;
         }
         data->position++;
@@ -102,6 +102,7 @@ static gint getIndentForLine(ScintillaObject *sci, gint start, gint end)
     GError *E=NULL;
     gint result=0;
     gchar *argv[2] = {GLISP_TOOLS_BASE "/lispindent" , NULL};
+    gchar **env = glispGetUtilityEnv();
     struct indentCbData *data = g_malloc(sizeof(struct indentCbData) *2);
 
     data[0].position=start;
@@ -111,7 +112,7 @@ static gint getIndentForLine(ScintillaObject *sci, gint start, gint end)
     data[1].end=end;
     data[1].sci=sci;
 
-    if (! spawn_with_callbacks(NULL,NULL,argv,NULL,SPAWN_SYNC,
+    if (! spawn_with_callbacks(NULL,NULL,argv,env,SPAWN_SYNC,
             (GIOFunc)stdinCb,&data[0],
             (SpawnReadFunc)stdoutCb,&data[1],0,
             NULL,NULL,0,
@@ -128,6 +129,7 @@ static gint getIndentForLine(ScintillaObject *sci, gint start, gint end)
 
 error:
     g_clear_error(&E);
+    g_strfreev(env);
     g_free(data);
     return result;
 }

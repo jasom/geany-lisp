@@ -1,7 +1,7 @@
 #!/bin/sh
 INPUT="$(cat -|
 sed 's/[\\"]/\\&/g')"
-OUTPUT="$(emacsclient -s slime-server -e '(ss-complete-lisp-symbol "'"$INPUT"'")' 
+OUTPUT="$(emacsclient -s "$GLISP_EMACSID" -e '(ss-complete-lisp-symbol "'"$INPUT"'")' 
 )"
 OUTPUT="${OUTPUT%\)}"
 OUTPUT="${OUTPUT#\(}"

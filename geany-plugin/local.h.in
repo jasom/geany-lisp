@@ -17,6 +17,11 @@ void glispCompletionsCharaddedCb(GeanyEditor *ed, SCNotification *nt, gint posit
 void glispKbRunComplete(G_GNUC_UNUSED guint key_id);
 void glispKbRunJump(G_GNUC_UNUSED guint key_id);
 
+//project functions
+void glispStartServer(void);
+void glispStopServer(void);
+
 //utilities
 void glispSlurpCb(GString *instring, GIOCondition condition, GPtrArray *accum);
 void glispStringDestroy(GString *s);
+gchar **glispGetUtilityEnv(void);

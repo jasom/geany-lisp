@@ -73,6 +73,7 @@ static void get_completions(ScintillaObject *sci, gint pos, long *backtrack, gch
     GError *E=NULL;
     GString *tmp=NULL;
     gchar *argv[2] = {GLISP_TOOLS_BASE "/lispcomplete" , NULL};
+    gchar **env = glispGetUtilityEnv();
     gsize i;
     GString *output=NULL;
 
@@ -88,13 +89,19 @@ static void get_completions(ScintillaObject *sci, gint pos, long *backtrack, gch
 
     stdinData.len=strlen(stdinData.p);
 
-    if (! spawn_with_callbacks(NULL,NULL,argv,NULL,SPAWN_SYNC,
+
+    if (! spawn_with_callbacks(NULL,NULL,argv,env,SPAWN_SYNC,
             (GIOFunc)stdinCb,&stdinData,
             (SpawnReadFunc)glispSlurpCb,inputBuffer,0,
             NULL,NULL,0,
             NULL,NULL,
             NULL,
-            &E))
+            &E)) {
+
+        g_assert(E);
+        fprintf(stderr, "Unable to get completions: %s\n",E->message);
+        goto cleanup;
+    }
 
     if(inputBuffer->len <  3) {
         goto cleanup;
@@ -120,6 +127,7 @@ static void get_completions(ScintillaObject *sci, gint pos, long *backtrack, gch
 
 cleanup:
     g_clear_error(&E);
+    g_strfreev(env);
     g_ptr_array_free(inputBuffer,TRUE);
     return;
 }

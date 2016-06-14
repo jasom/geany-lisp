@@ -1,4 +1,5 @@
 #!/bin/sh
+ID="${GLISP_EMACSID:-glisp-$PPID}"
 UNESCAPE="$(dirname $0)/unescape"
 EXPR='(ss-eval-expr
 "(let ((outs (make-array 0 :element-type '\''character :fill-pointer 0 :adjustable t)))
@@ -39,7 +40,7 @@ EXPR2="
 
 
          
-OUTPUT="$(emacsclient -s slime-server -e "$EXPR2" | sed 's/^"//;s/"$//' | "$UNESCAPE")" 
+OUTPUT="$(emacsclient -s "$ID" -e "$EXPR2" | sed 's/^"//;s/"$//' | "$UNESCAPE")" 
 printf "%s\n" "$OUTPUT" >&2
 
 #printf "%s" $OUTPUT|grep -q '^(("T"'

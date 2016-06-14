@@ -11,10 +11,14 @@ PLUGIN_KEY_GROUP(lisp, 2);
 //static GtkWidget *main_menu_item = NULL;
 
 static gboolean notify_cb(GObject *obj, GeanyEditor *ed, SCNotification *nt, gpointer user_data);
+static void project_open_cb(G_GNUC_UNUSED GObject * obj, G_GNUC_UNUSED GKeyFile * config, G_GNUC_UNUSED gpointer user_data);
+static void project_close_cb(G_GNUC_UNUSED GObject * obj, G_GNUC_UNUSED GKeyFile * config, G_GNUC_UNUSED gpointer user_data);
 
 PluginCallback plugin_callbacks[] =
 {
-    {"editor_notify", (GCallback)&notify_cb, TRUE,NULL},
+    {"editor-notify", (GCallback)&notify_cb, TRUE,NULL},
+    {"project-open", (GCallback)&project_open_cb, TRUE,NULL},
+    {"project-close", (GCallback)&project_close_cb, TRUE,NULL},
     {NULL,NULL,FALSE,NULL}
 };
 
@@ -41,6 +45,21 @@ static gboolean notify_cb(G_GNUC_UNUSED GObject *obj, GeanyEditor *ed, SCNotific
     return FALSE;
 }
 
+
+static void project_open_cb(G_GNUC_UNUSED GObject * obj,
+        G_GNUC_UNUSED GKeyFile * config,
+        G_GNUC_UNUSED gpointer user_data)
+{
+    glispStartServer();
+}
+
+static void project_close_cb(G_GNUC_UNUSED GObject * obj,
+        G_GNUC_UNUSED GKeyFile * config,
+        G_GNUC_UNUSED gpointer user_data)
+{
+    glispStopServer();
+}
+
 void plugin_init(G_GNUC_UNUSED GeanyData *data)
 {
     keybindings_set_item(plugin_key_group, 0, glispKbRunComplete,
@@ -48,6 +67,7 @@ void plugin_init(G_GNUC_UNUSED GeanyData *data)
     keybindings_set_item(plugin_key_group, 1, glispKbRunJump,
             0, 0, "run_lisp_jump", "Jump to Lisp definition", NULL);
 }
+
 void plugin_cleanup(void)
 {
     //gtk_widget_destroy(main_menu_item);
