@@ -10,3 +10,4 @@ fi
 mkdir -p "$(dirname "$PIDFILE")"
 "${EMACS_BIN}" -Q --daemon="${ID}" --load "${UTILITIES}/slime-server.el"
 "${EMACSCLIENT_BIN}" -s "$ID" -e '(emacs-pid)' > "$PIDFILE"
+"${EMACSCLIENT_BIN}" -s "$ID" -e "(ss-start-server \"$1\" \"$2\")" > "$PIDFILE"

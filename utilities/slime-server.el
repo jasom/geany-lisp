@@ -1,4 +1,3 @@
-(load (expand-file-name "~/quicklisp/slime-helper.el"))
 
 (setq-default indent-tabs-mode nil)
 
@@ -26,8 +25,6 @@
 (setq slime-lisp-implementations
       '(
 	(sbcl ("sbcl") :init-function ss-finish-setup)))
-
-(command-execute 'slime)
 
 (defun ss-setup-buffer ()
   (erase-buffer)
@@ -82,3 +79,7 @@
 		      (push (car elt) result)
 		      (push (cadr (assoc :file location)) result)
 		      (push (cadr (assoc :position location)) result))))))))
+
+(defun ss-start-server (slime-source lisp-exec)
+  (load (expand-file-name slime-source))
+  (slime lisp-exec))

@@ -6,12 +6,13 @@ Geany Development Plugin for Common Lisp
 Requirements
 ------------
 
-* Linux (may work on other \*nix, but is untested)
+* Linux (may work on other *nix, but is untested)
 * [[http://geany.org/ | geany]] the oldest version I've tested with is 1.25
 * you will need the plugin-dev headers for the above as well.
+* A lisp executable (currently only tested with sbcl)
 * GNU Emacs
-* Quicklisp installed in default location ($HOME/quicklisp)
-* Quicklisp slime helper installed on the above quicklisp
+* A working network connection is required when configuring a project in Geany
+  * The plugin downloads a local quicklisp install to the project directory
 
 Installing
 ----------
@@ -20,7 +21,6 @@ Installing
 * Select the plugin from the geany plugin manager
 * Configure keybindings from the geany plugin manager
 * If you wish the "Compile" command to work, copy the `filetypes.lisp` to `~/.config/geany/filedefs` I don't install this by default so as to not clobber any existing customizations that may already be there.
-* 
 
 Current Features
 ----------------
@@ -29,6 +29,11 @@ Current Features
 * Smart indenting
 * Compile current file
 * Completion of symbols
+
+Using
+-----
+
+This plugin will not do anything until a project has been configured to use the plugin.  To do so, open the project you wish to enable to do so and select "Project->Enable GLisp on project" from the menu.  This will install a local quicklisp to PROJECT_ROOT/quicklisp, and create an ASDF template using quickproject in PROJECT_ROOT/lisp.  It will then alter the project file with an option that includes the command for launching your lisp executable.  This defaults to "sbcl --no-sysinit --no-userinit" if you change to a different lisp executable, it is recommended that you ensure that arguments are passed to it such that your personal configuration (which may load a different quicklisp) is not loaded.
 
 
 Known Bugs

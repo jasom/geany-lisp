@@ -13,12 +13,14 @@ PLUGIN_KEY_GROUP(lisp, 2);
 static gboolean notify_cb(GObject *obj, GeanyEditor *ed, SCNotification *nt, gpointer user_data);
 static void project_open_cb(G_GNUC_UNUSED GObject * obj, G_GNUC_UNUSED GKeyFile * config, G_GNUC_UNUSED gpointer user_data);
 static void project_close_cb(G_GNUC_UNUSED GObject * obj, G_GNUC_UNUSED GKeyFile * config, G_GNUC_UNUSED gpointer user_data);
+static void project_save_cb(G_GNUC_UNUSED GObject * obj, GKeyFile * config, G_GNUC_UNUSED gpointer user_data);
 
 PluginCallback plugin_callbacks[] =
 {
     {"editor-notify", (GCallback)&notify_cb, TRUE,NULL},
     {"project-open", (GCallback)&project_open_cb, TRUE,NULL},
     {"project-close", (GCallback)&project_close_cb, TRUE,NULL},
+    {"project-save", (GCallback)&project_save_cb, TRUE,NULL},
     {NULL,NULL,FALSE,NULL}
 };
 
@@ -47,10 +49,18 @@ static gboolean notify_cb(G_GNUC_UNUSED GObject *obj, GeanyEditor *ed, SCNotific
 
 
 static void project_open_cb(G_GNUC_UNUSED GObject * obj,
-        G_GNUC_UNUSED GKeyFile * config,
+        GKeyFile * config,
         G_GNUC_UNUSED gpointer user_data)
 {
-    glispStartServer();
+    glispProjectOpen(config);
+    glispServerStart();
+}
+
+static void project_save_cb(G_GNUC_UNUSED GObject * obj,
+        GKeyFile * config,
+        G_GNUC_UNUSED gpointer user_data)
+{
+    glispProjectSave(config);
 }
 
 static void project_close_cb(G_GNUC_UNUSED GObject * obj,
@@ -58,6 +68,7 @@ static void project_close_cb(G_GNUC_UNUSED GObject * obj,
         G_GNUC_UNUSED gpointer user_data)
 {
     glispStopServer();
+    glispProjectClose();
 }
 
 void plugin_init(G_GNUC_UNUSED GeanyData *data)
@@ -66,6 +77,7 @@ void plugin_init(G_GNUC_UNUSED GeanyData *data)
             0, 0, "run_lisp_complete", "Complete lisp symbol", NULL);
     keybindings_set_item(plugin_key_group, 1, glispKbRunJump,
             0, 0, "run_lisp_jump", "Jump to Lisp definition", NULL);
+    glispProjectInit();
 }
 
 void plugin_cleanup(void)

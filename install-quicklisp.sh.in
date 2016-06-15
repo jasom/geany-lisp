@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+rm -rf utilities/quicklisp
+#TODO add paramters for author, license, copyright &ct.
+@LISP_CMD@ <<EOF
+(load "utilities/quicklisp.lisp")
+(quicklisp-quickstart:install :path "utilities/quicklisp/")
+(ql:quickload :quickproject)
+EOF

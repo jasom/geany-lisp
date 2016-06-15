@@ -5,6 +5,8 @@
 
 #define GLISP_TOOLS_BASE "@INSTALL_DIR@"
 
+#define GLISP_DEFAULT_LISP_INIT "@LISP_CMD@"
+
 extern GeanyPlugin     *geany_plugin;
 extern GeanyData       *geany_data;
 extern GeanyFunctions  *geany_functions;
@@ -17,11 +19,20 @@ void glispCompletionsCharaddedCb(GeanyEditor *ed, SCNotification *nt, gint posit
 void glispKbRunComplete(G_GNUC_UNUSED guint key_id);
 void glispKbRunJump(G_GNUC_UNUSED guint key_id);
 
-//project functions
-void glispStartServer(void);
+//server functions
+void glispServerStart(void);
 void glispStopServer(void);
+
+//project functions
+const gchar * glispProjectGetLispInit(void);
+void glispProjectOpen(GKeyFile *keyFile);
+void glispProjectInit(void);
+const gchar * glispProjectLispInit(void);
+void glispProjectSave(GKeyFile *config);
+void glispProjectClose(void);
 
 //utilities
 void glispSlurpCb(GString *instring, GIOCondition condition, GPtrArray *accum);
 void glispStringDestroy(GString *s);
 gchar **glispGetUtilityEnv(void);
+gchar *glispGetProjectBasePath(void);

@@ -1,4 +1,6 @@
-all: tup.config
+all: build utilities/quicklisp
+
+build: tup.config
 	sh build.sh
 
 tup.config:
@@ -7,3 +9,5 @@ tup.config:
 install: all
 	sh install.sh
 
+utilities/quicklisp: install-quicklisp.sh build
+	sh install-quicklisp.sh
