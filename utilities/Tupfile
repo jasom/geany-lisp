@@ -1,4 +1,4 @@
 include_rules
-
 # Add this back in if I ever need C utilities again
 #:foreach ../utilities-src/*.c |> gcc @(CFLAGS) %f -o %o |> %B
+: foreach $(TOP)/utilities-src/*.sh |> cp %f %o ; chmod +x %o |> %B

@@ -3,7 +3,7 @@ if ! test -e tup.config; then
     sh config.sh
 fi
 
-if $(which tup); then
+if which tup; then
     tup
 else
     echo "Tup not installed, falling back on manual build" >&2
