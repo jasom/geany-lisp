@@ -1,13 +1,24 @@
-all: build utilities/quicklisp
+all: run-tup utilities/quicklisp
 
-build: tup.config
-	sh build.sh
+run-tup: tup.config
+	sh build-scripts/build.sh
 
 tup.config:
-	sh config.sh
+	sh build-scripts/config.sh
 
 install: all
-	sh install.sh
+	sh build-scripts/install.sh
 
-utilities/quicklisp: install-quicklisp.sh build
-	sh install-quicklisp.sh
+build-scripts/install-quicklisp.sh: run-tup
+
+utilities/quicklisp: build-scripts/install-quicklisp.sh
+	sh build-scripts/install-quicklisp.sh
+
+config:
+	sh build-scripts/config.sh
+
+build-script:
+	sh build-scripts/generate-script.sh
+
+clean:
+	git clean -fdX

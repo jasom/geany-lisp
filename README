@@ -17,7 +17,7 @@ Requirements
 Installing
 ----------
 
-* `PREFIX=$HOME sh config.sh; make install`
+* `make config PREFIX=$HOME; make install`
 * Select the plugin from the geany plugin manager
 * Configure keybindings from the geany plugin manager
 * If you wish the "Compile" command to work, copy the `filetypes.lisp` to `~/.config/geany/filedefs` I don't install this by default so as to not clobber any existing customizations that may already be there.

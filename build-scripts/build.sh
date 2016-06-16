@@ -1,13 +1,9 @@
 set -e
-if ! test -e tup.config; then
-    sh config.sh
-fi
-
 if which tup; then
     tup
 else
     echo "Tup not installed, falling back on manual build" >&2
-    sh script.sh
+    sh build-scripts/script.sh
 fi
 
 if ! grep -q '^tup.config$' .gitignore; then
