@@ -46,16 +46,16 @@ cp ../utilities-src/quickproject.sh quickproject ; chmod +x quickproject
 cp ../utilities-src/stop-lisp.sh stop-lisp ; chmod +x stop-lisp
 cd '../geany-plugin'
 tup varsed local.h.in local.h
-gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC `pkg-config --cflags geany` -c -o completions.o completions.c
-gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC `pkg-config --cflags geany` -c -o definitions.o definitions.c
-gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC `pkg-config --cflags geany` -c -o indent.o indent.c
-gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC `pkg-config --cflags geany` -c -o plugin-main.o plugin-main.c
-gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC `pkg-config --cflags geany` -c -o project.o project.c
-gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC `pkg-config --cflags geany` -c -o server.o server.c
-gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC `pkg-config --cflags geany` -c -o util.o util.c
-gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC `pkg-config --cflags geany` -o glisp.so completions.o definitions.o indent.o plugin-main.o project.o server.o util.o
+gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags geany) -c -o completions.o completions.c
+gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags geany) -c -o definitions.o definitions.c
+gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags geany) -c -o indent.o indent.c
+gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags geany) -c -o plugin-main.o plugin-main.c
+gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags geany) -c -o project.o project.c
+gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags geany) -c -o server.o server.c
+gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags geany) -c -o util.o util.c
+gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags geany) -o glisp.so completions.o definitions.o indent.o plugin-main.o project.o server.o util.o
 cd '../build-scripts'
 tup varsed install-quicklisp.sh.in install-quicklisp.sh
 tup varsed install.sh.in install.sh
-cd "$ROOT_DIR"
+cd "$ROOT_DIR" || exit 1
 tar xpf build-scripts/git-ignore.tar

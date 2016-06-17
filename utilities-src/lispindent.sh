@@ -1,8 +1,5 @@
 #!/bin/sh
-UNESCAPE="$(dirname $0)/string.awk"
-NL='
-'
-
+UNESCAPE="$(dirname "$0")/string.awk"
 #set -x
 INPUT="$(sed 's/["\\]/\\&/g')"
 printf 'INPUT:\n%s\nENDINPUT' "$INPUT" > /tmp/lispindent.log

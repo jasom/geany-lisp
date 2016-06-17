@@ -1,18 +1,6 @@
 #!/bin/sh
 ID="${GLISP_EMACSID:-glisp-$PPID}"
-UNESCAPE="$(dirname $0)/string.awk"
-EXPR='(ss-eval-expr
-"(let ((outs (make-array 0 :element-type '\''character :fill-pointer 0 :adjustable t)))
-  (with-output-to-string (s outs)
-  (let ((*error-output* s)
-        (*standard-output* s))
-    (multiple-value-bind (truename warnings-p failure-p)
-        (compile-file \"'"$1"'\")
-        (unless failure-p
-          (load truename))
-          (finish-output s)
-          (values (not failure-p) outs)))))")'
-#echo "$EXPR" >&2
+UNESCAPE="$(dirname "$0")/string.awk"
 EXPR2="
 (let* ((sldb-hook (lambda () (sldb-abort)))
        (results nil)
