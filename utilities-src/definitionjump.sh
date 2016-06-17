@@ -1,6 +1,11 @@
 #!/bin/sh
 UNESCAPE="$(dirname "$0")/string.awk"
-ITEMS="$(emacsclient -s "$GLISP_EMACSID" -e '(ss-find-definitions "'"${1}"'")'| awk -f "$UNESCAPE" |tr '\n' ' ')"
+escape() {
+    printf '%s\n' "$1"|sed 's/[\\"]/\\&/g'
+}
+SYMBOL="$(escape "$1")"
+PACKAGE="$(escape "$2")"
+ITEMS="$(emacsclient -s "$GLISP_EMACSID" -e "(ss-find-definitions \"$SYMBOL\" \"$PACKAGE\")"| awk -f "$UNESCAPE" |tr '\n' ' ')"
 #printf '%s\n' "$ITEMS"
 #printf '%q\n' "$ITEMS"
 eval "for item in $ITEMS; do echo \$item; done"

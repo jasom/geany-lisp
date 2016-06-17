@@ -348,13 +348,14 @@ void glispKbRunJump(G_GNUC_UNUSED guint key_id)
     GeanyEditor* editor;
     GError *E=NULL;
     G_GNUC_UNUSED ScintillaObject *sci;
-    const gint BUF_SIZE=1024;
-    char *argv[3] = {0};
+    const gint MAX_WORD_SIZE=1024;
+    char *argv[4] = {0};
     GPtrArray *inputBuffer = g_ptr_array_new_with_free_func((GDestroyNotify)glispStringDestroy);
     gchar **env = glispGetUtilityEnv();
 
 
-    gchar *buffer =g_malloc(BUF_SIZE);
+    gchar *word =g_malloc(MAX_WORD_SIZE);
+    gchar *package = NULL;
 
     if(!doc || !doc->editor || ! doc->editor->sci) {
         return;
@@ -362,11 +363,14 @@ void glispKbRunJump(G_GNUC_UNUSED guint key_id)
     editor = doc->editor;
     sci = editor->sci;
 
-    read_current_word(editor, -1, buffer, BUF_SIZE, lispWordChars, FALSE);
+    package = glispSearchBufferPackage(sci);
+
+    read_current_word(editor, -1, word, MAX_WORD_SIZE, lispWordChars, FALSE);
 
     argv[0] = GLISP_TOOLS_BASE "/definitionjump";
-    argv[1] = buffer;
-    argv[2] = NULL;
+    argv[1] = word;
+    argv[2] = package;
+    argv[3] = NULL;
 
     if (! spawn_with_callbacks(NULL,NULL,argv,env,0,
             NULL,NULL,
@@ -385,5 +389,7 @@ void glispKbRunJump(G_GNUC_UNUSED guint key_id)
 error:
     g_clear_error(&E);
     g_strfreev(env);
+    g_free(word);
+    g_free(package);
     g_ptr_array_free(inputBuffer,TRUE);
 }

@@ -68,17 +68,35 @@
       (ss-setup-buffer)
       (slime-eval `(cl-user::ssh-simple-eval ,str)))))
 
-(defun ss-find-definitions (name)
-  (let ((dfns (slime-find-definitions name))
-	(result nil))
+(defun ss-find-definitions (name package)
+  (let* ((slime-buffer-package package)
+        (dfns (slime-find-definitions name))
+        (result nil))
     (apply 'concat
-	   (mapcar (lambda (x) (format "%S\n" x))
-		(when dfns
-		  (dolist (elt dfns (reverse result))
-		    (let ((location (cdr (assoc :location (cdr elt)))))
-		      (push (car elt) result)
-		      (push (cadr (assoc :file location)) result)
-		      (push (cadr (assoc :position location)) result))))))))
+           (mapcar (lambda (x) (format "%S\n" x))
+                   (when dfns
+                     (dolist (elt dfns (reverse result))
+                       (let ((location (cdr (assoc :location (cdr elt)))))
+                         (push (car elt) result)
+                         (push (cadr (assoc :file location)) result)
+                         (push (cadr (assoc :position location)) result))))))))
+
+;; This is more involved in slime's internals than I would like
+(defun ss-async-wait (fn args callback)
+  (let* ((tag (cl-gensym "ss-async-wait")))
+    (apply
+      callback
+      (catch
+        tag
+        (apply fn `(,@args ,(lambda (&rest args) (throw tag args))))
+        (let ((inhibit-quit nil)
+              (conn (slime-connection)))
+          (while t
+                 (unless (eq (process-status conn) 'open)
+                   (error "Lisp connection closed unexpectedly"))
+                 (accept-process-output nil 0.01)))))))
+
+;(defun ss-uses-xrefs (symbol)
 
 (defun ss-start-server (slime-source lisp-exec)
   (load (expand-file-name slime-source))
