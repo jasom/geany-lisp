@@ -31,7 +31,7 @@ function octnumber(str,  ret, n, k)
 
 
 BEGIN { RS="\\" ; notQuoted = 0}
-#{ print $0 ; next}
+#{ printf("'%s'\n",$0) > "/dev/stderr" ; next}
 NR == 1 {
     if(match($0,/^"/)) {
         split($0,matches,"\"")
@@ -62,6 +62,7 @@ notQuoted == 1 {
         printf("%s",matches[1])
         exit 0
     }
+    notQuoted = 0;
     printf("%s",$0);
     next
 }
