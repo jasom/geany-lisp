@@ -1,13 +1,9 @@
 #!/bin/sh
-ID="$GLISP_EMACSID"
-UTILITIES="$(dirname "$0")"
-EMACS_BIN="${EMACS:-emacs}"
-EMACSCLIENT_BIN="${EMACSCLIENT_BIN:-emacsclient}"
-PIDFILE="/tmp/$(whoami)/glisp/emacs-${ID}.pid"
-if "${EMACSCLIENT_BIN}" -s "$ID" -e t; then
+. "$(dirname "$0")"/local
+if "${EMACSCLIENT_BIN}" -s "$GLISP_EMACSID" -e t; then
     echo "Server already running" >&2
 fi
-mkdir -p "$(dirname "$PIDFILE")"
-"${EMACS_BIN}" -Q --daemon="${ID}" --load "${UTILITIES}/slime-server.el"
-"${EMACSCLIENT_BIN}" -s "$ID" -e '(emacs-pid)' > "$PIDFILE"
-"${EMACSCLIENT_BIN}" -s "$ID" -e "(ss-start-server \"$1\" \"$2\")" > "$PIDFILE"
+mkdir -p "$(dirname "$SERVER_PIDFILE")"
+"${EMACS_BIN}" -Q --daemon="${GLISP_EMACSID}" --load "${UTILITIES}/slime-server.el"
+"${EMACSCLIENT_BIN}" -s "$GLISP_EMACSID" -e '(emacs-pid)' > "$SERVER_PIDFILE"
+"${EMACSCLIENT_BIN}" -s "$GLISP_EMACSID" -e "(ss-start-server \"$1\" \"$2\")"

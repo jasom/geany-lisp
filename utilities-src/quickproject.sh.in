@@ -1,6 +1,6 @@
 #!/bin/sh
+. "$(dirname "$0")"/local
 #TODO add paramters for author, license, copyright &ct.
-UTILITIES="$(dirname "$0")"
 if ! test -e "$1/quicklisp"; then
 @LISP_CMD@ <<EOF
 (load "$UTILITIES/quicklisp.lisp")

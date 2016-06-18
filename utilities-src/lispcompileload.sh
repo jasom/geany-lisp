@@ -1,5 +1,5 @@
 #!/bin/sh
-ID="${GLISP_EMACSID:-glisp-$PPID}"
+. "$(dirname "$0")"/local
 UNESCAPE="$(dirname "$0")/string.awk"
 EXPR2="
 (let* ((sldb-hook (lambda () (sldb-abort)))
@@ -28,7 +28,7 @@ EXPR2="
 
 
          
-OUTPUT="$(emacsclient -s "$ID" -e "$EXPR2" | awk -f "$UNESCAPE")" 
+OUTPUT="$(emacsclient -s "$GLISP_EMACSID" -e "$EXPR2" | awk -f "$UNESCAPE")" 
 printf "%s\n" "$OUTPUT" >&2
 
 #printf "%s" $OUTPUT|grep -q '^(("T"'
