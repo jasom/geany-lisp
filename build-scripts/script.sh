@@ -41,7 +41,7 @@ cp ../utilities-src/launch-lisp.sh launch-lisp ; chmod +x launch-lisp
 cp ../utilities-src/lispcompileload.sh lispcompileload ; chmod +x lispcompileload
 cp ../utilities-src/lispcomplete.sh lispcomplete ; chmod +x lispcomplete
 cp ../utilities-src/lispindent.sh lispindent ; chmod +x lispindent
-cp ../utilities-src/positiontolinenumber.sh positiontolinenumber ; chmod +x positiontolinenumber
+cp ../utilities-src/local.sh local ; chmod +x local
 cp ../utilities-src/quickproject.sh quickproject ; chmod +x quickproject
 cp ../utilities-src/stop-lisp.sh stop-lisp ; chmod +x stop-lisp
 cd '../geany-plugin'
