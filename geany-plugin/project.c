@@ -62,7 +62,9 @@ void glispProjectClose(void)
 
 void glispProjectSave(GKeyFile *config)
 {
+    // New project does a save but not open
     if(ProjectInfo == NULL) {
+        glispProjectOpen(config);
         return;
     }
 
@@ -112,6 +114,7 @@ static void enableGlispCb(G_GNUC_UNUSED GtkMenuItem *item, G_GNUC_UNUSED gpointe
 
     newProjectInfo(GLISP_DEFAULT_LISP_INIT);
     project_write_config();
+    glispServerStart();
 cleanup:
     g_free(projectPath);
     g_strfreev(env);

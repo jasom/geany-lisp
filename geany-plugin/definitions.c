@@ -337,7 +337,7 @@ static void exit_cb(G_GNUC_UNUSED GPid pid, gint status, GPtrArray *stdout_lines
     
 cleanup:
     g_clear_error(&E);
-    g_ptr_array_free(results,TRUE);
+    if(results) g_ptr_array_free(results,TRUE);
     g_ptr_array_free(stdout_lines,TRUE);
 }
 
