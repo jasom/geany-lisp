@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck source=utilities-src/local.sh
 . "$(dirname "$0")"/local
 UNESCAPE="$(dirname "$0")/string.awk"
 EXPR2="

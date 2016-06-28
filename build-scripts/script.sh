@@ -34,6 +34,7 @@ alias tup='true &&' #this makes "tup varsed" act like "true && varsed"
 # remainder of generated build script goes here
 #! /bin/sh -e
 cd 'utilities-src'
+tup varsed glispinit.lisp.in glispinit.lisp
 tup varsed quickproject.sh.in quickproject.sh
 cd '../utilities'
 cp ../utilities-src/definitionjump.sh definitionjump ; chmod +x definitionjump
@@ -44,6 +45,11 @@ cp ../utilities-src/lispindent.sh lispindent ; chmod +x lispindent
 cp ../utilities-src/local.sh local ; chmod +x local
 cp ../utilities-src/quickproject.sh quickproject ; chmod +x quickproject
 cp ../utilities-src/stop-lisp.sh stop-lisp ; chmod +x stop-lisp
+cp ../utilities-src/glispinit.lisp glispinit.lisp
+cp ../utilities-src/glispinit2.lisp glispinit2.lisp
+cp ../utilities-src/quicklisp.lisp quicklisp.lisp
+cp ../utilities-src/string.awk string.awk
+cp ../utilities-src/slime-server.el slime-server.el
 cd '../geany-plugin'
 tup varsed local.h.in local.h
 gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags geany) -c -o completions.o completions.c

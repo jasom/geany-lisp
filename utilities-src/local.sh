@@ -1,5 +1,10 @@
-#Find our path
+# shellcheck disable=SC2148
+# shellcheck shell=sh
+# shellcheck disable=SC2034
+:
 set -e
+
+#Find our path
 UTILITIES="$(cd "$(dirname "$0")" && pwd)"
 test -d "$UTILITIES" || exit 1
 
@@ -42,4 +47,8 @@ splitStringList() {
     else
         eval "for item in $1; do echo \"\$item\"; done"
     fi
+}
+
+run_lisp() {
+    eval "$GLISP_INIT"
 }

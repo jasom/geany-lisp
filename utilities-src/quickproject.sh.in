@@ -1,6 +1,10 @@
 #!/bin/sh
+# shellcheck source=utilities-src/local.sh
 . "$(dirname "$0")"/local
 #TODO add paramters for author, license, copyright &ct.
+
+# NB: We must use @LISP_CMD@ rather than run_lisp as environment might not be
+# setup by geany yet
 if ! test -e "$1/quicklisp"; then
 @LISP_CMD@ <<EOF
 (load "$UTILITIES/quicklisp.lisp")
@@ -11,8 +15,12 @@ fi
 
 if ! test -e "$1/lisp"; then
 @LISP_CMD@ <<EOF
-(load "$UTILITIES/quicklisp/setup.lisp")
+(load "$(escape "$UTILITIES/quicklisp/setup.lisp")")
 (ql:quickload :quickproject)
 (quickproject:make-project "$1/lisp/" :name "$2")
 EOF
+fi
+
+if ! test -e "$1/quicklisp/glispinit.lisp"; then
+    cp "$UTILITIES/glispinit.lisp" "$1/quicklisp/glispinit.lisp"
 fi

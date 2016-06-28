@@ -1,4 +1,9 @@
 include_rules
+FILES_TO_COPY += $(TOP)/utilities-src/*.lisp
+FILES_TO_COPY += $(TOP)/utilities-src/*.awk
+FILES_TO_COPY += $(TOP)/utilities-src/*.el
+
 # Add this back in if I ever need C utilities again
 #:foreach ../utilities-src/*.c |> gcc @(CFLAGS) %f -o %o |> %B
 : foreach $(TOP)/utilities-src/*.sh |> cp %f %o ; chmod +x %o |> %B
+: foreach $(FILES_TO_COPY) |> cp %f %o |> %b

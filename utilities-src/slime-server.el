@@ -1,30 +1,14 @@
 
 (setq-default indent-tabs-mode nil)
 
-(setq ss-bootstrap-string
-"
-(defun ssh-simple-eval (string &optional (package-name \"CL-USER\"))
-  (let ((results
-	 (multiple-value-list
-	  (ignore-errors
-	    (let ((*package* (find-package package-name)))
-	      (multiple-value-list
-	       (eval (read-from-string string))))))))
-    (list (mapcar #'prin1-to-string (car results))
-	  (and (cdr results)
-	  (prin1-to-string (cadr results))))))
-")
+(defvar ss-init-path)
 
 (defun ss-finish-setup ()
   (slime-eval
    `(cl:ignore-errors
      (cl:let ((cl:*package* (cl:find-package "CL-USER")))
        (cl:eval
-	(cl:read-from-string ,ss-bootstrap-string))))))
-
-(setq slime-lisp-implementations
-      '(
-	(sbcl ("sbcl") :init-function ss-finish-setup)))
+         (cl:load ,ss-init-path))))))
 
 (defun ss-setup-buffer ()
   (erase-buffer)
@@ -66,7 +50,7 @@
   (let ((x (get-buffer-create " myscratch.lisp")))
     (with-current-buffer x
       (ss-setup-buffer)
-      (slime-eval `(cl-user::ssh-simple-eval ,str)))))
+      (slime-eval `(geany-helper::simple-eval ,str)))))
 
 (defun ss-find-definitions (name package)
   (let* ((slime-buffer-package package)
@@ -98,6 +82,12 @@
 
 ;(defun ss-uses-xrefs (symbol)
 
-(defun ss-start-server (slime-source lisp-exec)
+(defun ss-start-server (slime-source lisp-exec init-file)
   (load (expand-file-name slime-source))
-  (slime lisp-exec))
+  (setq ss-init-path init-file)
+  (cl-destructuring-bind
+    (program &rest program-args)
+    (split-string-and-unquote lisp-exec)
+  (slime-start :program program
+               :program-args program-args
+               :init-function 'ss-finish-setup)))

@@ -3,7 +3,6 @@
 void glispServerStart()
 {
     GError *E = NULL;
-    GString *slimePath = g_string_new("");
     gchar **env = NULL;
     gchar *projectPath = glispGetProjectBasePath();
     const gchar *argv[4] = {GLISP_TOOLS_BASE "/launch-lisp",NULL,NULL,NULL};
@@ -11,9 +10,7 @@ void glispServerStart()
 
     if(!lispInit) goto cleanup;
 
-    g_string_printf(slimePath,"%s/quicklisp/slime-helper.el",projectPath);
-
-    argv[1] = slimePath->str;
+    argv[1] = projectPath;
     argv[2] = lispInit;
 
     env = glispGetUtilityEnv();
@@ -28,7 +25,6 @@ void glispServerStart()
 
 cleanup:
     g_free(projectPath);
-    glispStringDestroy(slimePath);
     g_clear_error(&E);
     g_strfreev(env);
 }
