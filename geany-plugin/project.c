@@ -8,6 +8,7 @@ static struct ProjectInfo {
 
 static void enableGlispCb(GtkMenuItem *item, gpointer user_data);
 static void glispAddProjectMenuItems(void);
+static GtkWidget *enableGlispMenuItem;
 
 const gchar * glispProjectGetLispInit(void)
 {
@@ -30,11 +31,11 @@ static void destroyProjectInfo()
     }
 }
 
-static GtkWidget *enableGlispMenuItem;
 
 void glispProjectOpen(GKeyFile *keyFile)
 {
     gchar *tmp;
+    GString *id = g_string_new("");
 
     g_assert(ProjectInfo == NULL);
 
@@ -50,13 +51,16 @@ void glispProjectOpen(GKeyFile *keyFile)
     ProjectInfo = g_malloc0(sizeof(struct ProjectInfo));
 
     ProjectInfo->lispInit = tmp;
-    //ProjectInfo->asdfFile = g_key_file_get_value(keyFile, "glisp", "asdf_file", NULL);
-    //ProjectInfo->systemName = g_key_file_get_value(keyFile, "glisp", "system_name", NULL);
+
+    g_setenv("GLISP_INIT",ProjectInfo->lispInit, TRUE);
+    g_string_printf(id,"glisp-%d",getpid());
+    g_setenv("GLISP_EMACSID",id->str,FALSE);
+
+    glispStringDestroy(id);
 }
 
 void glispProjectClose(void)
 {
-
     destroyProjectInfo();
 }
 
@@ -74,6 +78,7 @@ void glispProjectSave(GKeyFile *config)
 void glispProjectInit(void)
 {
     glispAddProjectMenuItems();
+    gtk_widget_set_sensitive(enableGlispMenuItem, FALSE);
 }
 
 static void glispAddProjectMenuItems(void)
@@ -86,11 +91,9 @@ static void glispAddProjectMenuItems(void)
     enableGlispMenuItem = menuItem;
 }
 
-
 static void enableGlispCb(G_GNUC_UNUSED GtkMenuItem *item, G_GNUC_UNUSED gpointer user_data)
 {
     gchar *projectPath = glispGetProjectBasePath();
-    gchar **env = NULL;
     GError *E = NULL;
     gchar *argv[4] = {GLISP_TOOLS_BASE "/quickproject",NULL,NULL,NULL};
     
@@ -102,9 +105,7 @@ static void enableGlispCb(G_GNUC_UNUSED GtkMenuItem *item, G_GNUC_UNUSED gpointe
     argv[1] = projectPath;
     argv[2] = geany_data->app->project->name;
 
-    env = glispGetUtilityEnv();
-
-    if (! spawn_sync(NULL,NULL, argv,env,NULL,NULL,NULL,NULL,&E))
+    if (! spawn_sync(NULL,NULL, argv,NULL,NULL,NULL,NULL,NULL,&E))
     {
 
         g_assert(E);
@@ -115,8 +116,8 @@ static void enableGlispCb(G_GNUC_UNUSED GtkMenuItem *item, G_GNUC_UNUSED gpointe
     newProjectInfo(GLISP_DEFAULT_LISP_INIT);
     project_write_config();
     glispServerStart();
+
 cleanup:
     g_free(projectPath);
-    g_strfreev(env);
     g_clear_error(&E);
 }

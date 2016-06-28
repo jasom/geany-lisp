@@ -1,17 +1,5 @@
 #include "local.h"
 
-gchar **glispGetUtilityEnv(void)
-{
-    GString *id = g_string_new("");
-    gchar **env;
-    g_string_printf(id,"glisp-%d",getpid());
-    env = g_get_environ();
-    env = g_environ_setenv(env,"GLISP_EMACSID",id->str,FALSE);
-
-    glispStringDestroy(id);
-    return env;
-}
-
 
 void glispStringDestroy(GString *s)
 {

@@ -6,7 +6,8 @@ void glispCompletionsCharaddedCb(GeanyEditor *ed, SCNotification *nt, gint posit
 {
     static gint first,last;
 
-    if(strchr(" \"\t\n()#;",nt->ch)) {
+    //BUG: Need to check sytnax at point so I don't try to complete in strings
+    if(strchr(" \"\t\n(),;",nt->ch)) {
         first=-2;
         last=-2;
         return;
@@ -73,7 +74,6 @@ static void get_completions(ScintillaObject *sci, gint pos, long *backtrack, gch
     GError *E=NULL;
     GString *tmp=NULL;
     gchar *argv[2] = {GLISP_TOOLS_BASE "/lispcomplete" , NULL};
-    gchar **env = glispGetUtilityEnv();
     gsize i;
     GString *output=NULL;
 
@@ -90,7 +90,7 @@ static void get_completions(ScintillaObject *sci, gint pos, long *backtrack, gch
     stdinData.len=strlen(stdinData.p);
 
 
-    if (! spawn_with_callbacks(NULL,NULL,argv,env,SPAWN_SYNC,
+    if (! spawn_with_callbacks(NULL,NULL,argv,NULL,SPAWN_SYNC,
             (GIOFunc)stdinCb,&stdinData,
             (SpawnReadFunc)glispSlurpCb,inputBuffer,0,
             NULL,NULL,0,
@@ -127,7 +127,6 @@ static void get_completions(ScintillaObject *sci, gint pos, long *backtrack, gch
 
 cleanup:
     g_clear_error(&E);
-    g_strfreev(env);
     g_ptr_array_free(inputBuffer,TRUE);
     return;
 }

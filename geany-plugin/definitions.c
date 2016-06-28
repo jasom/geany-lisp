@@ -351,7 +351,6 @@ void glispKbRunJump(G_GNUC_UNUSED guint key_id)
     const gint MAX_WORD_SIZE=1024;
     char *argv[4] = {0};
     GPtrArray *inputBuffer = g_ptr_array_new_with_free_func((GDestroyNotify)glispStringDestroy);
-    gchar **env = glispGetUtilityEnv();
 
 
     gchar *word =g_malloc(MAX_WORD_SIZE);
@@ -372,7 +371,7 @@ void glispKbRunJump(G_GNUC_UNUSED guint key_id)
     argv[2] = package;
     argv[3] = NULL;
 
-    if (! spawn_with_callbacks(NULL,NULL,argv,env,0,
+    if (! spawn_with_callbacks(NULL,NULL,argv,NULL,0,
             NULL,NULL,
             (SpawnReadFunc)glispSlurpCb,inputBuffer,0,
             NULL,NULL,0,
@@ -388,7 +387,6 @@ void glispKbRunJump(G_GNUC_UNUSED guint key_id)
 
 error:
     g_clear_error(&E);
-    g_strfreev(env);
     g_free(word);
     g_free(package);
     g_ptr_array_free(inputBuffer,TRUE);

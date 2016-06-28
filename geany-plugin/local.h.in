@@ -34,6 +34,5 @@ void glispProjectClose(void);
 //utilities
 void glispSlurpCb(GString *instring, GIOCondition condition, GPtrArray *accum);
 void glispStringDestroy(GString *s);
-gchar **glispGetUtilityEnv(void);
 gchar *glispGetProjectBasePath(void);
 gchar *glispSearchBufferPackage(ScintillaObject *sci);
