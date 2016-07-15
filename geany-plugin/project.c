@@ -55,6 +55,7 @@ void glispProjectOpen(GKeyFile *keyFile)
     g_setenv("GLISP_INIT",ProjectInfo->lispInit, TRUE);
     g_string_printf(id,"glisp-%d",getpid());
     g_setenv("GLISP_EMACSID",id->str,FALSE);
+    g_setenv("GLISP_UTILITY_PATH",GLISP_TOOLS_BASE,FALSE);
 
     glispStringDestroy(id);
 }
