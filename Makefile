@@ -22,3 +22,11 @@ build-script:
 
 clean:
 	git clean -fdX
+
+.PHONY:
+
+test: .PHONY all
+	cd test; sh run-tests.sh
+
+test-full: .PHONY all
+	cd test; GLISP_RUN_SLOW_TESTS=yes sh run-tests.sh
