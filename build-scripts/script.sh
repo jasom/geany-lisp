@@ -35,21 +35,16 @@ alias tup='true &&' #this makes "tup varsed" act like "true && varsed"
 #! /bin/sh -e
 cd 'utilities-src'
 tup varsed glispinit.lisp.in glispinit.lisp
-tup varsed quickproject.sh.in quickproject.sh
+cd '../geany-utilities'
+tup varsed quickproject.lisp.in quickproject.lisp
+sh make-manifest.sh ~/quicklisp/setup.lisp
+sh make.sh
 cd '../utilities'
-cp ../utilities-src/definitionjump.sh definitionjump ; chmod +x definitionjump
-cp ../utilities-src/launch-lisp.sh launch-lisp ; chmod +x launch-lisp
-cp ../utilities-src/lispcompileload.sh lispcompileload ; chmod +x lispcompileload
-cp ../utilities-src/lispcomplete.sh lispcomplete ; chmod +x lispcomplete
-cp ../utilities-src/lispindent.sh lispindent ; chmod +x lispindent
-cp ../utilities-src/local.sh local ; chmod +x local
-cp ../utilities-src/quickproject.sh quickproject ; chmod +x quickproject
-cp ../utilities-src/stop-lisp.sh stop-lisp ; chmod +x stop-lisp
 cp ../utilities-src/glispinit.lisp glispinit.lisp
 cp ../utilities-src/glispinit2.lisp glispinit2.lisp
 cp ../utilities-src/quicklisp.lisp quicklisp.lisp
-cp ../utilities-src/string.awk string.awk
 cp ../utilities-src/slime-server.el slime-server.el
+cp ../geany-utilities/geany-utilities geany-utilities
 cd '../geany-plugin'
 tup varsed local.h.in local.h
 gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags geany) -c -o completions.o completions.c
@@ -63,5 +58,9 @@ gcc $CONFIG_CFLAGS -Wall -Wextra -Werror -shared -fPIC $(pkg-config --cflags gea
 cd '../build-scripts'
 tup varsed install-quicklisp.sh.in install-quicklisp.sh
 tup varsed install.sh.in install.sh
+cd '../test/utility-tests'
+tup varsed setupenv.in setupenv
+cd '../..'
+tup varsed filetypes.lisp.in filetypes.lisp
 cd "$ROOT_DIR" || exit 1
 tar xpf build-scripts/git-ignore.tar
