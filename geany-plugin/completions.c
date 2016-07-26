@@ -73,7 +73,7 @@ static void get_completions(ScintillaObject *sci, gint pos, long *backtrack, gch
     GPtrArray *inputBuffer = g_ptr_array_new_with_free_func((GDestroyNotify)glispStringDestroy);
     GError *E=NULL;
     GString *tmp=NULL;
-    gchar *argv[2] = {GLISP_TOOLS_BASE "/lispcomplete" , NULL};
+    gchar *argv[3] = {GLISP_UTILITY,"lisp-complete", NULL};
     gsize i;
     GString *output=NULL;
 

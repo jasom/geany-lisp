@@ -1,4 +1,4 @@
 . ./setupenv
 
-pkill -9 -F "/tmp/$(whoami)/glisp/emacs-glisp-test-id.pid" emacs
+pkill -9 -f -- --daemon=glisp-test-id
 rm -rf test-project

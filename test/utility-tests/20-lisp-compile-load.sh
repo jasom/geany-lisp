@@ -8,4 +8,4 @@ cat - <<EOF > test-project/test.lisp
 3)
 EOF
 
-"$GLISP_UTILITY_PATH/lispcompileload" "$PWD/test-project/test.lisp"
+"$GLISP_UTILITY_PATH/geany-utilities" lisp-compile-load "$PWD/test-project/test.lisp"

@@ -57,5 +57,6 @@ run_cmd=clisp "%f"
 
 [build-menu]
 FT_00_LB=_Compile
-FT_00_CM=~/share/glisp/lispcompileload "%f"
+FT_00_CM=@INSTALL_DIR@/geany-utilities lisp-compile-load "%f"
 FT_00_WD=
+error_regex=([^\t]*)\t([^\t]*)\t

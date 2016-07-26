@@ -96,15 +96,15 @@ static void enableGlispCb(G_GNUC_UNUSED GtkMenuItem *item, G_GNUC_UNUSED gpointe
 {
     gchar *projectPath = glispGetProjectBasePath();
     GError *E = NULL;
-    gchar *argv[4] = {GLISP_TOOLS_BASE "/quickproject",NULL,NULL,NULL};
+    gchar *argv[5] = {GLISP_UTILITY, "quickproject", NULL, NULL, NULL};
     
 
     if(geany_data->app->project == NULL) {
         goto cleanup;
     }
 
-    argv[1] = projectPath;
-    argv[2] = geany_data->app->project->name;
+    argv[2] = projectPath;
+    argv[3] = geany_data->app->project->name;
 
     if (! spawn_sync(NULL,NULL, argv,NULL,NULL,NULL,NULL,NULL,&E))
     {

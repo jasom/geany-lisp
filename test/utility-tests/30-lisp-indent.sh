@@ -2,5 +2,5 @@
 . ./setupenv
 
 trap 'rm -f lisp-indent.out' EXIT
-"$GLISP_UTILITY_PATH/lispindent" "test-function" "CL-USER" > lisp-indent.out < test-project/test.lisp
+head -c -1 test-project/test.lisp |"$GLISP_UTILITY_PATH/geany-utilities" lisp-indent > lisp-indent.out
 diff lisp-indent.out outputs/lisp-indent.out

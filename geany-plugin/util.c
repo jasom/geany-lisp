@@ -12,6 +12,7 @@ void glispSlurpCb(GString *instring, GIOCondition condition, GPtrArray *accum)
         // I think line buffered means call this once per line
         g_assert (instring->str[instring->len-1] == '\n');
         GString *line = g_string_new_len(instring->str,instring->len-1); //Strip newline
+        fprintf(stderr,"%s",instring->str);
         g_ptr_array_add(accum,line);
     }
 }

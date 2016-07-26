@@ -349,7 +349,7 @@ void glispKbRunJump(G_GNUC_UNUSED guint key_id)
     GError *E=NULL;
     G_GNUC_UNUSED ScintillaObject *sci;
     const gint MAX_WORD_SIZE=1024;
-    char *argv[4] = {0};
+    char *argv[5] = {0};
     GPtrArray *inputBuffer = g_ptr_array_new_with_free_func((GDestroyNotify)glispStringDestroy);
 
 
@@ -366,10 +366,11 @@ void glispKbRunJump(G_GNUC_UNUSED guint key_id)
 
     read_current_word(editor, -1, word, MAX_WORD_SIZE, lispWordChars, FALSE);
 
-    argv[0] = GLISP_TOOLS_BASE "/definitionjump";
-    argv[1] = word;
-    argv[2] = package;
-    argv[3] = NULL;
+    argv[0] = GLISP_UTILITY;
+    argv[1] = "definition-jump";
+    argv[2] = word;
+    argv[3] = package;
+    argv[4] = NULL;
 
     if (! spawn_with_callbacks(NULL,NULL,argv,NULL,0,
             NULL,NULL,

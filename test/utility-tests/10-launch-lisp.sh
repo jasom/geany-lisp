@@ -2,4 +2,4 @@
 
 set -e
 
-"$GLISP_UTILITY_PATH/launch-lisp" test-project "$GLISP_INIT"
+"$GLISP_UTILITY_PATH/geany-utilities" launch-lisp test-project "$GLISP_INIT"

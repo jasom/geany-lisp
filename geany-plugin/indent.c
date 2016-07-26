@@ -101,7 +101,7 @@ static gint getIndentForLine(ScintillaObject *sci, gint start, gint end)
 {
     GError *E=NULL;
     gint result=0;
-    gchar *argv[2] = {GLISP_TOOLS_BASE "/lispindent" , NULL};
+    gchar *argv[3] = {GLISP_UTILITY, "lisp-indent", NULL};
     struct indentCbData *data = g_malloc(sizeof(struct indentCbData) *2);
 
     data[0].position=start;

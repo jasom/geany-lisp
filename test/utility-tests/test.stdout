@@ -1,0 +1,17 @@
+00-quickproject.sh:
+
+10-launch-lisp.sh:
+
+20-lisp-compile-load.sh:
+
+30-definition-jump.sh:
+
+30-lisp-complete.sh:
+
+30-lisp-indent.sh:
+
+80-stop-lisp.sh:
+
+99-cleanup.sh:
+
+

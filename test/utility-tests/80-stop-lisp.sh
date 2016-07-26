@@ -3,5 +3,5 @@
 
 set -e
 
-"$GLISP_UTILITY_PATH/stop-lisp"
-! pgrep -F "/tmp/$(whoami)/glisp/emacs-glisp-test-id.pid" emacs
+"$GLISP_UTILITY_PATH/geany-utilities" stop-lisp
+! pgrep -f -- --daemon=glisp-test-id

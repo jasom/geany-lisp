@@ -91,3 +91,27 @@
   (slime-start :program program
                :program-args program-args
                :init-function 'ss-finish-setup)))
+
+(defun ss-compile-load (source)
+  (let* ((sldb-hook (lambda () (sldb-abort)))
+	 (results nil)
+	 buf
+	 (done nil)
+	 (slime-compilation-finished-hook (lambda (&rest r) (setf done t))))
+    (print source t)
+    (find-file source)
+    (setq buf (get-file-buffer source))
+    (print (buffer-name buf) t)
+    (unwind-protect
+	(progn
+	  (goto-char (point-min))
+	  (slime-compile-and-load-file)
+	  (while (not done)
+	    (unless (eq (process-status (slime-connection)) 'open)
+	      (error \"Lisp connection closed unexpectedly\"))
+	    (accept-process-output nil 0.01))
+	  (set-buffer buf)
+	  (while (slime-find-next-note)
+	    (push (list (line-number-at-pos) (get-char-property (point) 'help-echo)) results))
+	  (apply 'concat (mapcar (lambda (x) (format "%s\t%s\t%s\n" source (car x) (cadr x))) (reverse results))))
+      (kill-buffer buf))))

@@ -4,13 +4,13 @@ void glispServerStart()
 {
     GError *E = NULL;
     gchar *projectPath = glispGetProjectBasePath();
-    const gchar *argv[4] = {GLISP_TOOLS_BASE "/launch-lisp",NULL,NULL,NULL};
+    const gchar *argv[5] = {GLISP_UTILITY, "launch-lisp",NULL,NULL,NULL};
     const gchar *lispInit = glispProjectGetLispInit();
 
     if(!lispInit) goto cleanup;
 
-    argv[1] = projectPath;
-    argv[2] = lispInit;
+    argv[2] = projectPath;
+    argv[3] = lispInit;
 
     if (! spawn_sync(NULL,NULL, (gchar **)argv,NULL,NULL,NULL,NULL,NULL,&E))
     {
@@ -29,7 +29,7 @@ void glispStopServer(void)
 {
     GError *E = NULL;
 
-    gchar *argv[2] = {GLISP_TOOLS_BASE "/stop-lisp" , NULL};
+    gchar *argv[3] = {GLISP_UTILITY, "stop-lisp" , NULL};
 
 
 

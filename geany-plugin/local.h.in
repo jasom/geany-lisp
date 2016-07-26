@@ -5,6 +5,8 @@
 
 #define GLISP_TOOLS_BASE "@INSTALL_DIR@"
 
+#define GLISP_UTILITY GLISP_TOOLS_BASE "/geany-utilities"
+
 #define GLISP_DEFAULT_LISP_INIT "@LISP_CMD@"
 
 extern GeanyPlugin     *geany_plugin;

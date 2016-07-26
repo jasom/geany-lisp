@@ -1,0 +1,54 @@
+(in-package #:geany-utilities)
+
+(defun quickproject (project-root project-name)
+  (let ((project-root
+	 (ensure-directory-pathname
+	  (ensure-absolute-pathname project-root *default-pathname-defaults*))))
+  (unless
+      (probe-file (merge-pathnames*
+		   (parse-unix-namestring "quicklisp/")
+		   project-root))
+    (run-program "@LISP_CMD@"
+		 :error-output t
+		 :output t
+		 :input
+		 (make-string-input-stream
+		 (format nil
+			 "(load ~S)
+			 (quicklisp-quickstart:install
+			   :path ~S)
+                         (ql:quickload :quicklisp-slime-helper)"
+			 (merge-pathnames*
+			  (parse-unix-namestring "quicklisp.lisp")
+			  *utility-path*)
+			 (merge-pathnames*
+			  (parse-unix-namestring "quicklisp/")
+			  project-root)))))
+  (unless
+      (probe-file (merge-pathnames*
+		   (parse-unix-namestring "lisp/")
+		   project-root))
+    (run-program "@LISP_CMD@"
+		 :output t
+		 :error-output t
+		 :input
+		 (make-string-input-stream
+		 (format nil
+			 "(load ~S)
+                          (ql:quickload :quickproject)
+                          (quickproject:make-project ~S :name ~S)"
+			 (merge-pathnames*
+			  (parse-unix-namestring "quicklisp/setup.lisp")
+			  project-root)
+			 (merge-pathnames* "lisp/" project-root)
+			 project-name))))
+  (unless (probe-file (merge-pathnames*
+		       (parse-unix-namestring "quicklisp/glispinit.lisp")
+		       project-root))
+    (with-open-file (in (merge-pathnames* "glispinit.lisp" *utility-path*) :direction :input :element-type '(unsigned-byte 8))
+      (with-open-file (out (merge-pathnames*
+		       (parse-unix-namestring "quicklisp/glispinit.lisp")
+		       project-root) :direction :output
+		       :element-type '(unsigned-byte 8)
+		       :if-does-not-exist :create)
+	(copy-stream-to-stream in out :element-type '(unsigned-byte 8)))))))

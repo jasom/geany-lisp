@@ -1,0 +1,19 @@
+00-quickproject.sh:
+
+10-launch-lisp.sh:
+*ERROR*: Not connected.
+20-lisp-compile-load.sh:
+
+30-definition-jump.sh:
+
+30-lisp-complete.sh:
+(18 "cl-user::test-function" "cl-user::test-function")
+
+
+30-lisp-indent.sh:
+
+80-stop-lisp.sh:
+
+99-cleanup.sh:
+
+

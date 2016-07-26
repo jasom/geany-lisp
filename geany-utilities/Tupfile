@@ -1,0 +1,4 @@
+include_rules
+include $(TOP)/includeme.tup
+: *.lisp geany-utilities.asd | make-manifest.sh |> sh make-manifest.sh ~/quicklisp/setup.lisp |> geany-utilities.manifest
+: *.lisp geany-utilities.asd geany-utilities.manifest |> sh make.sh |> geany-utilities
