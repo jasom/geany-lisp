@@ -11,7 +11,6 @@
 
 extern GeanyPlugin     *geany_plugin;
 extern GeanyData       *geany_data;
-extern GeanyFunctions  *geany_functions;
 
 //charadded hooks
 void glispIndentCharaddedCb(GeanyEditor *ed, SCNotification *nt, gint pos);
