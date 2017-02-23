@@ -11,8 +11,10 @@ install: all
 
 build-scripts/install-quicklisp.sh: run-tup
 
-utilities/quicklisp: build-scripts/install-quicklisp.sh
-	sh build-scripts/install-quicklisp.sh
+quicklisp.tgz: run-tup
+
+utilities/quicklisp: quicklisp.tgz
+	tar -C utilities -xf quicklisp.tgz
 
 config:
 	sh build-scripts/config.sh

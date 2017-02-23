@@ -4,12 +4,7 @@
   :description "Describe geany-utilities here"
   :author "Your Name <your.name@example.com>"
   :license "Specify license here"
-  :depends-on (#:alexandria
-	       #:flexi-streams
-	       #:inferior-shell
-               #:quickproject
-	       #:dissect
-               #:uiop)
+  :depends-on #.(with-open-file (f "deps.txt") (read f))
   :serial t
   :entry-point "geany-utilities::entry-point"
   :components ((:file "package")

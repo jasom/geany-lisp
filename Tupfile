@@ -1,2 +1,3 @@
 include_rules
 include $(TOP)/includeme.tup
+: $(TOP)/build-scripts/install-quicklisp.sh qlinstall/quicklisp.lisp |> sh $(TOP)/build-scripts/install-quicklisp.sh .; tar zcf quicklisp.tgz quicklisp; rm -rf quicklisp |> quicklisp.tgz

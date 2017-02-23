@@ -15,10 +15,12 @@ run_lisp <<EOF
  repeat 10
  while errors
  do (setf errors nil)
-     (with-open-file (f "geany-utilities.manifest")
+     (with-open-file (f "quicklisp/manifest.txt")
      (loop for line = (read-line f nil nil)
      while line
-         unless (ignore-errors (asdf:load-asd line)) do (setf errors t))))
+     do 
+         (asdf:load-asd (uiop:merge-pathnames* line (truename "quicklisp/"))))))
+         ;unless (ignore-errors (asdf:load-asd (uiop:merge-pathnames* line "quicklisp/"))) do (setf errors t))))
 (asdf:load-asd "geany-utilities.asd")
 (asdf:load-system :geany-utilities)
 (setf uiop/image:*image-entry-point* 'geany-utilities::entry-point)

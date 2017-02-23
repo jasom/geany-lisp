@@ -5,18 +5,17 @@ set -e
 run_lisp () {
     sbcl --no-sysinit --no-userinit
 }
-QUICKLISP="${QUICKLISP:-$HOME/quicklisp/setup.lisp}"
+QUICKLISP="./quicklisp/setup.lisp"
 
 rm -f geany-utilities.manifest
 
-run_lisp <<EOF
+run_lisp <<EOF >&2
 #-asdf(require 'asdf)
 (sb-ext:restrict-compiler-policy 'debug 3)
 (asdf:initialize-source-registry
  '(:source-registry :ignore-inherited-configuration))
 (load "$QUICKLISP")
-(asdf:load-asd "geany-utilities.asd")
-(ql:quickload "geany-utilities")
-(ql:write-asdf-manifest-file "geany-utilities.manifest")
+(map 'nil 'ql:quickload (with-open-file (f "deps.txt") (read f)))
+(ql:write-asdf-manifest-file t)
 (uiop:quit)
 EOF
