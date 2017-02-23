@@ -4,6 +4,7 @@
 (defvar ss-init-path)
 
 (defun ss-finish-setup ()
+  (setf slime-load-failed-fasl 'never)
   (slime-eval
    `(cl:ignore-errors
      (cl:let ((cl:*package* (cl:find-package "CL-USER")))
@@ -113,5 +114,6 @@
 	  (set-buffer buf)
 	  (while (slime-find-next-note)
 	    (push (list (line-number-at-pos) (get-char-property (point) 'help-echo)) results))
-	  (apply 'concat (mapcar (lambda (x) (format "%s\t%s\t%s\n" source (car x) (cadr x))) (reverse results))))
+          (format "%s\n%s" (third slime-last-compilation-result)
+                  (apply 'concat (mapcar (lambda (x) (format "%s\t%s\t%s\n" source (car x) (cadr x))) (reverse results)))))
       (kill-buffer buf))))
