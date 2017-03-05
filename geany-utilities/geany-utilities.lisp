@@ -17,6 +17,9 @@
      :output outs
      :element-type '(unsigned-byte 8))))
 
+
+(trace uiop:getenvp)
+
 (defun call-with-environment (function args)
   (let* ((*emacs-id* (getenvp "GLISP_EMACSID"))
 	 (*emacs-bin* (or (getenvp "EMACS") "emacs"))

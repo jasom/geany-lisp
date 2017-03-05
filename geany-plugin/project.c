@@ -9,6 +9,7 @@ static struct ProjectInfo {
 static void enableGlispCb(GtkMenuItem *item, gpointer user_data);
 static void glispAddProjectMenuItems(void);
 static GtkWidget *enableGlispMenuItem;
+static void openLispFiles(const gchar *path);
 
 const gchar * glispProjectGetLispInit(void)
 {
@@ -98,6 +99,7 @@ static void enableGlispCb(G_GNUC_UNUSED GtkMenuItem *item, G_GNUC_UNUSED gpointe
     GError *E = NULL;
     gchar *argv[5] = {GLISP_UTILITY, "quickproject", NULL, NULL, NULL};
     
+    g_setenv("GLISP_UTILITY_PATH",GLISP_TOOLS_BASE,FALSE);
 
     if(geany_data->app->project == NULL) {
         goto cleanup;
@@ -114,11 +116,65 @@ static void enableGlispCb(G_GNUC_UNUSED GtkMenuItem *item, G_GNUC_UNUSED gpointe
         goto cleanup;
     }
 
+    gtk_widget_set_sensitive(enableGlispMenuItem, FALSE);
     newProjectInfo(GLISP_DEFAULT_LISP_INIT);
     project_write_config();
     glispServerStart();
 
+    openLispFiles(projectPath);
+
 cleanup:
     g_free(projectPath);
     g_clear_error(&E);
+}
+
+static void openLispFilesInternal(const gchar *path)
+{
+    static GPatternSpec* lispPattern=NULL;
+    static GPatternSpec* asdfPattern=NULL;
+    GDir *directory=NULL;
+    GError *E = NULL;
+
+    if(lispPattern == NULL) {
+        lispPattern = g_pattern_spec_new("*.lisp");
+        asdfPattern = g_pattern_spec_new("*.asd");
+    }
+
+    directory=g_dir_open(path, 0, &E);
+    if(directory == NULL) {
+        g_assert(E);
+        fprintf(stderr, "Unable to open directory: %s\n", E->message);
+        goto cleanup;
+    }
+
+    for(const gchar *name = g_dir_read_name(directory);
+            name != NULL;
+            name = g_dir_read_name(directory)) {
+        gchar * filename = g_build_filename(path,name,NULL);
+        if(g_file_test(filename, G_FILE_TEST_IS_REGULAR)) {
+            if(g_pattern_match_string(lispPattern, name) ||
+                    g_pattern_match_string(asdfPattern, name)) {
+                document_open_file(filename, FALSE, NULL, NULL);
+            }
+        }else if(g_file_test(filename, G_FILE_TEST_IS_SYMLINK)) {
+            /* g_file_test follows symlinks, so if we reach here
+             * it's a symlink to something other than a regular file
+             * We don't want to follow directory symlinks without
+             * circularity tests, so just skip for now */
+        } else if(g_file_test(filename, G_FILE_TEST_IS_DIR)) {
+            openLispFiles(name);
+        }
+        g_free(filename);
+    }
+
+cleanup:
+    if(directory != NULL) g_dir_close(directory);
+}
+
+static void openLispFiles(const gchar *projectDirectory)
+{
+    gchar *cwd = g_get_current_dir();
+    g_chdir(projectDirectory);
+    openLispFilesInternal("lisp");
+    g_free(cwd);
 }

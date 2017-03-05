@@ -69,7 +69,7 @@ cleanup:
 
 static void get_completions(ScintillaObject *sci, gint pos, long *backtrack, gchar **partial, gchar**completions) 
 {
-    struct stdinData stdinData = {0};
+    struct stdinData stdinData = {NULL,0,0};
     GPtrArray *inputBuffer = g_ptr_array_new_with_free_func((GDestroyNotify)glispStringDestroy);
     GError *E=NULL;
     GString *tmp=NULL;

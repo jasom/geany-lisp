@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <geanyplugin.h>
+#include <glib/gstdio.h>
 
 #define GLISP_TOOLS_BASE "@INSTALL_DIR@"
 

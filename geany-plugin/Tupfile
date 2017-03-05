@@ -2,7 +2,8 @@ include_rules
 
 include $(TOP)/includeme.tup
 
-CFLAGS=@(CFLAGS) -Wall -Wextra -Werror -shared -fPIC \$(pkg-config --cflags geany)
+CFLAGS=@(CFLAGS) -Wall -Wextra -Werror -fPIC @(GEANY_CFLAGS)
+LDFLAGS=-shared
 
-: foreach *.c | local.h |> gcc $(CFLAGS) -c -o %o %f |> %B.o
-: *.o |> gcc $(CFLAGS) -o %o %f |> glisp.so
+: foreach *.c | local.h |> @(CC) $(CFLAGS) -c -o %o %f |> %B.o
+: *.o |> @(CC) $(LDFLAGS) $(CFLAGS) -o %o %f |> glisp.so
