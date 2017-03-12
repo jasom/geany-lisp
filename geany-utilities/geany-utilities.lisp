@@ -18,7 +18,9 @@
      :element-type '(unsigned-byte 8))))
 
 
-(trace uiop:getenvp)
+;(trace uiop:getenvp)
+(trace call-with-environment)
+(trace entry-point)
 
 (defun call-with-environment (function args)
   (let* ((*emacs-id* (getenvp "GLISP_EMACSID"))
@@ -32,7 +34,8 @@
     (apply function args)))
 
 (defparameter +valid-commands+ '(launch-lisp definition-jump lisp-indent lisp-compile-load
-				 quickproject launch-lisp stop-lisp lisp-complete))
+				 quickproject launch-lisp stop-lisp lisp-complete
+                                 lisp-build-project))
 
 (defun entry-point ()
   (handler-case
@@ -43,7 +46,7 @@
 	      (args (cdr *command-line-arguments*)))
 	  (if (member command +valid-commands+)
 	      (call-with-environment command args)
-	      (error "No command Found"))))
+	      (error "No command Found ~S" command))))
     (t () (uiop:quit 1))))
 
 (defun unescape-byte-stream (in out)

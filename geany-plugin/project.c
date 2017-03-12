@@ -2,8 +2,9 @@
 
 static struct ProjectInfo {
     gchar *lispInit;
-    //gchar *asdfFile;
-    //gchar *systemName;
+    gchar *asdfFile;
+    gchar *systemName;
+    gboolean newProject;
 } *ProjectInfo = NULL;
 
 static void enableGlispCb(GtkMenuItem *item, gpointer user_data);
@@ -17,16 +18,39 @@ const gchar * glispProjectGetLispInit(void)
     return ProjectInfo->lispInit;
 }
 
+static void installDefaultMake()
+{
+    gchar *buildCmd = g_strdup_printf(GLISP_UTILITY " lisp-build-project %%p/%s %s", ProjectInfo->asdfFile, ProjectInfo->systemName);
+    g_assert(buildCmd != NULL);
+    build_set_menu_item(GEANY_BCS_PROJ, GEANY_GBG_NON_FT, 0, GEANY_BC_LABEL, "_Make");
+    build_set_menu_item(GEANY_BCS_PROJ, GEANY_GBG_NON_FT, 0, GEANY_BC_COMMAND, buildCmd);
+    build_set_menu_item(GEANY_BCS_PROJ, GEANY_GBG_NON_FT, 0, GEANY_BC_WORKING_DIR, "%p");
+
+    g_free(buildCmd);
+}
+
+
 static void newProjectInfo(gchar *lispInit)
 {
     ProjectInfo = g_malloc0(sizeof(struct ProjectInfo));
     ProjectInfo->lispInit = g_strdup(lispInit);
+    ProjectInfo->newProject = TRUE;
+    gchar *asdfname = g_strconcat(geany_data->app->project->name,".asd",NULL);
+
+    g_assert(asdfname != NULL);
+
+    ProjectInfo->asdfFile = g_build_filename("lisp",asdfname,NULL);
+    ProjectInfo->systemName = g_strdup(geany_data->app->project->name);
+
+    g_free(asdfname);
 }
 
 static void destroyProjectInfo()
 {
     if(ProjectInfo != NULL) {
         g_free(ProjectInfo->lispInit);
+        g_free(ProjectInfo->asdfFile);
+        g_free(ProjectInfo->systemName);
         g_free(ProjectInfo);
         ProjectInfo = NULL;
     }
@@ -38,6 +62,7 @@ void glispProjectOpen(GKeyFile *keyFile)
     gchar *tmp;
     GString *id = g_string_new("");
 
+    fprintf(stderr,"glispProjectOpen\n");
     g_assert(ProjectInfo == NULL);
 
     tmp = g_key_file_get_string(keyFile, "glisp", "lisp_init", NULL);
@@ -52,6 +77,21 @@ void glispProjectOpen(GKeyFile *keyFile)
     ProjectInfo = g_malloc0(sizeof(struct ProjectInfo));
 
     ProjectInfo->lispInit = tmp;
+
+    tmp = g_key_file_get_string(keyFile, "glisp", "asdf_file", NULL);
+    ProjectInfo->asdfFile = tmp;
+
+    tmp = g_key_file_get_string(keyFile, "glisp", "system_name", NULL);
+    ProjectInfo->systemName = tmp;
+
+    tmp = g_key_file_get_string(keyFile, "build-menu", "NF_00_LB",NULL);
+    if(tmp == NULL) {
+        installDefaultMake();
+    }
+    g_free(tmp);
+
+    ProjectInfo->newProject = FALSE;
+
 
     g_setenv("GLISP_INIT",ProjectInfo->lispInit, TRUE);
     g_string_printf(id,"glisp-%d",getpid());
@@ -68,6 +108,7 @@ void glispProjectClose(void)
 
 void glispProjectSave(GKeyFile *config)
 {
+    fprintf(stderr,"glispProjectSave\n");
     // New project does a save but not open
     if(ProjectInfo == NULL) {
         glispProjectOpen(config);
@@ -75,6 +116,14 @@ void glispProjectSave(GKeyFile *config)
     }
 
     g_key_file_set_string(config, "glisp", "lisp_init", ProjectInfo->lispInit);
+    g_key_file_set_string(config, "glisp", "asdf_file", ProjectInfo->asdfFile);
+    g_key_file_set_string(config, "glisp", "system_name", ProjectInfo->systemName);
+
+    /* If it's a new project, force an open */
+    if(ProjectInfo->newProject) {
+        destroyProjectInfo();
+        glispProjectOpen(config);
+    }
 }
 
 void glispProjectInit(void)
@@ -105,6 +154,13 @@ static void enableGlispCb(G_GNUC_UNUSED GtkMenuItem *item, G_GNUC_UNUSED gpointe
         goto cleanup;
     }
 
+    /*
+    GString *id = g_string_new("");
+    g_string_printf(id,"glisp-%d",getpid());
+    g_setenv("GLISP_EMACSID",id->str,FALSE);
+    glispStringDestroy(id);
+    */
+
     argv[2] = projectPath;
     argv[3] = geany_data->app->project->name;
 
@@ -112,11 +168,11 @@ static void enableGlispCb(G_GNUC_UNUSED GtkMenuItem *item, G_GNUC_UNUSED gpointe
     {
 
         g_assert(E);
-        fprintf(stderr, "Unable to start lisp server: %s\n",E->message);
+        fprintf(stderr, "Unable to run quickproject: %s\n",E->message);
         goto cleanup;
     }
 
-    gtk_widget_set_sensitive(enableGlispMenuItem, FALSE);
+    //gtk_widget_set_sensitive(enableGlispMenuItem, FALSE);
     newProjectInfo(GLISP_DEFAULT_LISP_INIT);
     project_write_config();
     glispServerStart();

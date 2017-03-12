@@ -13,6 +13,7 @@
 	       (:file "stop-lisp")
 	       (:file "definition-jump")
 	       (:file "lisp-complete")
+	       (:file "lisp-build-project")
 	       (:file "lisp-compile-load")
 	       (:file "quickproject")
 	       (:file "lisp-indent")))
