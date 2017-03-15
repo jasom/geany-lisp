@@ -1,4 +1,5 @@
 #include "local.h"
+#include <stdint.h>
 
 static void complete_at_position(ScintillaObject *sci, gint pos);
 

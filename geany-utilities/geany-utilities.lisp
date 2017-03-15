@@ -35,7 +35,8 @@
 
 (defparameter +valid-commands+ '(launch-lisp definition-jump lisp-indent lisp-compile-load
 				 quickproject launch-lisp stop-lisp lisp-complete
-                                 lisp-build-project))
+                                 lisp-build-project repl-output repl-prompt repl-send-input
+                                 tester))
 
 (defun entry-point ()
   (handler-case
@@ -48,6 +49,36 @@
 	      (call-with-environment command args)
 	      (error "No command Found ~S" command))))
     (t () (uiop:quit 1))))
+
+(defun simple-el-reader (stream)
+  (flet ((consume-whitespace (stream)
+           (loop while (member (flex:peek-byte stream)
+                               '(#x20 #x0a #x09))
+                 do (read-byte stream))))
+
+    (consume-whitespace stream)
+    (case (flex:peek-byte stream)
+      ((#x20 #x0a #x09) ;whitespace
+       (read-byte stream))
+      (#x22 ; "
+       (return-from
+         simple-el-reader
+         (flex:with-output-to-sequence (out)
+           (unescape-byte-stream stream out))))
+      (#x28 ; (
+       (read-byte stream)
+       (loop
+         collect (simple-el-reader stream)
+         do (consume-whitespace stream)
+         when (= (flex:peek-byte stream) #x29)
+         do (read-byte stream) (loop-finish)))
+      (t
+        (read stream)))))
+
+(defun el-read-from-bytes (bytes)
+  (flex:with-input-from-sequence (in bytes)
+    (with-open-stream (inf (flex:make-flexi-stream in))
+      (simple-el-reader inf))))
 
 (defun unescape-byte-stream (in out)
   (assert (= (read-byte in) 34))
@@ -129,3 +160,8 @@
   (esc outs arg colon at)
   (write-char #\" outs))
 
+
+(defun tester ()
+  (let ((raw (emacs-eval "(list 3 \"hello, world!\")")))
+    (princ (el-read-from-bytes raw))
+    (write-sequence raw *standard-output*)))

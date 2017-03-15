@@ -3,6 +3,7 @@ FILES_TO_COPY += $(TOP)/utilities-src/*.lisp
 #FILES_TO_COPY += $(TOP)/utilities-src/*.awk
 FILES_TO_COPY += $(TOP)/utilities-src/*.el
 FILES_TO_COPY += $(TOP)/geany-utilities/geany-utilities
+FILES_TO_COPY += $(TOP)/utilities-src/*.glade
 
 # Add this back in if I ever need C utilities again
 #:foreach ../utilities-src/*.c |> gcc @(CFLAGS) %f -o %o |> %B

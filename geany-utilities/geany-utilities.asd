@@ -16,5 +16,7 @@
 	       (:file "lisp-build-project")
 	       (:file "lisp-compile-load")
 	       (:file "quickproject")
+               (:file "repl")
 	       (:file "lisp-indent")))
+               
 

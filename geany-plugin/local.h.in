@@ -33,6 +33,9 @@ const gchar * glispProjectLispInit(void);
 void glispProjectSave(GKeyFile *config);
 void glispProjectClose(void);
 
+//REPL functions
+void glispCreateReplUi(void);
+
 //utilities
 void glispSlurpCb(GString *instring, GIOCondition condition, GPtrArray *accum);
 void glispStringDestroy(GString *s);

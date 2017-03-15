@@ -19,6 +19,7 @@ void glispServerStart()
         fprintf(stderr, "Unable to start lisp server: %s\n",E->message);
         goto cleanup;
     }
+    glispCreateReplUi();
 
 cleanup:
     g_free(projectPath);

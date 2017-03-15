@@ -3,8 +3,59 @@
 
 (defvar ss-init-path)
 
+(defvar ss-repl-buffer nil)
+
+(defvar ss-output-marker (make-marker))
+
+(defun ss-get-repl-buffer ()
+  (or ss-repl-buffer
+      (setf ss-repl-buffer
+	    (let (result)
+	      (mapcar (lambda (x)
+			(when (string-prefix-p "*slime-repl " (buffer-name x))
+			  (setf result x)))
+		      (buffer-list))
+	      result))))
+
+(defun ss-output-text ()
+  (with-current-buffer (ss-get-repl-buffer)
+    (prog1
+      (if (marker-buffer ss-output-marker)
+        (buffer-substring-no-properties ss-output-marker slime-output-end)
+        (buffer-substring-no-properties 1 slime-output-end))
+      (set-marker ss-output-marker slime-output-end))))
+
+(defun ss-prompt ()
+  (with-current-buffer (ss-get-repl-buffer)
+    (buffer-substring-no-properties slime-repl-prompt-start-mark
+				    slime-repl-input-start-mark)))
+
+(defun ss-input ()
+  (with-current-buffer (ss-get-repl-buffer)
+    (buffer-substring-no-properties slime-repl-input-start-mark
+				    (point-max))))
+
+(defun ss-input-and-return (txt offset)
+  (with-current-buffer (ss-get-repl-buffer)
+    (ss-set-input txt)
+    (goto-char slime-repl-input-start-mark)
+    (forward-char offset)
+    (slime-repl-return)))
+
+(defun ss-set-input (x)
+  (with-current-buffer (ss-get-repl-buffer)
+    (delete-region slime-repl-input-start-mark (point-max))
+    (goto-char slime-repl-input-start-mark)
+    (insert x)))
+
+(defun ss-db-hook ()
+  ;(sldb-print-condition)
+  (slime-repl-eval-string "(swank:sdlb-print-condition)")
+  (sldb-quit))
+
 (defun ss-finish-setup ()
   (setf slime-load-failed-fasl 'never)
+  (setf sldb-hook 'ss-db-hook)
   (slime-eval
    `(cl:ignore-errors
      (cl:let ((cl:*package* (cl:find-package "CL-USER")))
