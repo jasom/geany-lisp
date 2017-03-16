@@ -29,7 +29,7 @@ void geany_load_module(GeanyPlugin *plugin)
 {
     plugin->info->name = "Lisp Development";
     plugin->info->description = "Lisp Development";
-    plugin->info->version = "0.1";
+    plugin->info->version = "0.2";
     plugin->info->author = "Jason Miller <jasom@fastmail.com>";
     plugin->funcs->callbacks = plugin_callbacks;
     plugin->funcs->init = myplugin_init;
