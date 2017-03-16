@@ -1,4 +1,12 @@
 set -e
+
+export glispTMPDIR;
+#Using a consistent path for quicklisp means the ASDF cache can work
+#We can't have quicklisp in-tree as tup wants a fully-specified output
+glispTMPDIR="/tmp/glisptmp-$(echo "$PWD"|sha1sum|cut -d' ' -f1)"
+
+mkdir -p "$glispTMPDIR"
+
 if which tup; then
     tup
 else

@@ -1,4 +1,5 @@
 include_rules
 include $(TOP)/includeme.tup
 : deps.txt | make-manifest.sh $(TOP)/quicklisp.tgz |> tar -zmxf $(TOP)/quicklisp.tgz ; sh make-manifest.sh $(TOP)/quicklisp/setup.lisp; tar zcf quicklisp.tgz quicklisp ; rm -rf quicklisp |> quicklisp.tgz
-: *.lisp geany-utilities.asd quicklisp.tgz |> tar -zmxf quicklisp.tgz && sh make.sh && rm -rf quicklisp |> geany-utilities
+export glispTMPDIR
+: *.lisp geany-utilities.asd quicklisp.tgz |> sh make.sh |> geany-utilities

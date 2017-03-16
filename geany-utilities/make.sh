@@ -1,6 +1,12 @@
 #!/bin/sh
 
-set -e
+set -ex
+
+glispTMPDIR=${glispTMPDIR:?}
+
+trap 'rm -rf "$glispTMPDIR/quicklisp"' EXIT
+
+tar -C "$glispTMPDIR" -zxf ./quicklisp.tgz
 
 run_lisp () {
     sbcl --no-sysinit --no-userinit
@@ -15,16 +21,14 @@ run_lisp <<EOF
  repeat 10
  while errors
  do (setf errors nil)
-     (with-open-file (f "quicklisp/manifest.txt")
+     (with-open-file (f "$glispTMPDIR/quicklisp/manifest.txt")
      (loop for line = (read-line f nil nil)
      while line
      do 
-         (asdf:load-asd (uiop:merge-pathnames* line (truename "quicklisp/"))))))
-         ;unless (ignore-errors (asdf:load-asd (uiop:merge-pathnames* line "quicklisp/"))) do (setf errors t))))
+         (asdf:load-asd (uiop:merge-pathnames* line (truename "$glispTMPDIR/quicklisp/"))))))
 (asdf:load-asd "geany-utilities.asd")
 (asdf:load-system :geany-utilities)
 (setf uiop/image:*image-entry-point* 'geany-utilities::entry-point)
-;(trace geany-utilities::emacs-eval)
 (uiop/image:dump-image "geany-utilities" :executable t)
 EOF
 
