@@ -1,12 +1,7 @@
-UTILITIES="$(echo utilities/[!T]*)"
-PLUGINS=geany-plugin/*.so
+PLUGINS="$(echo geany-plugin/*.so)"
 
 mkdir -p "@INSTALL_DIR@"
 mkdir -p "@GEANY_PLUGIN_DIR@"
 
 tar -C utilities --exclude=Tupfile --exclude=.gitignore -cp .|tar -C "@INSTALL_DIR@" -xpv
-#for utility in $UTILITIES; do
-    #cp $utility "@INSTALL_DIR@"
-    #chmod +x "@INSTALL_DIR@/$(basename $utility)"
-#done
 cp $PLUGINS "@GEANY_PLUGIN_DIR@"

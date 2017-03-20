@@ -1,4 +1,30 @@
 #include "local.h"
+#include <gdk/gdkkeysyms.h>
+
+#if (GTK_MAJOR_VERSION < 3) || (GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION < 10)
+GtkBuilder *
+gtk_builder_new_from_file (const gchar *filename)
+{
+    GtkBuilder* b = gtk_builder_new();
+    if(!gtk_builder_add_from_file(b,filename,NULL)) {
+        g_error("Unable to add builder from %s\n", filename);
+    }
+    return b;
+}
+#endif
+
+#if (GTK_MAJOR_VERSION < 3) || (GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION < 2)
+gboolean
+gdk_event_get_keyval(GdkEvent *event, guint *keyval)
+{
+    if(event->type != GDK_KEY_PRESS && event->type != GDK_KEY_RELEASE) return FALSE;
+
+    *keyval = event->key.keyval;
+    return TRUE;
+}
+#endif
+    
+
 
 static struct ReplInfo {
     GtkWidget *container;
@@ -16,6 +42,22 @@ static gchar* getOutputLines(guint startPosition);
 static gchar* getPrompt();
 gboolean glisp_repl_key_pressed (G_GNUC_UNUSED GtkWidget *widget,
         GdkEvent  *event, G_GNUC_UNUSED gpointer user_data);
+#if GTK_MAJOR_VERSION < 3
+static void myConnectFunction(G_GNUC_UNUSED GtkBuilder *builder, GObject
+        *object, const gchar *signal_name, const gchar *handler_name, GObject
+        *connect_object, GConnectFlags flags, gpointer user_data)
+{
+    g_assert(!strcmp("glisp_repl_key_pressed", handler_name));
+
+    if(connect_object) {
+        g_signal_connect_object(object, signal_name, G_CALLBACK(glisp_repl_key_pressed), connect_object, flags);
+    }
+    else {
+        g_signal_connect(object, signal_name, G_CALLBACK(glisp_repl_key_pressed), user_data);
+    }
+}
+
+#endif
 
 void glispCreateReplUi()
 {
@@ -24,9 +66,14 @@ void glispCreateReplUi()
 
     GtkWidget* ReplTabLabel = gtk_label_new("REPL");
 
+#if GTK_MAJOR_VERSION < 3
+    GtkBuilder *b = gtk_builder_new_from_file(GLISP_TOOLS_BASE "/repl2.glade");
+    gtk_builder_connect_signals_full(b,myConnectFunction, NULL);
+#else
     GtkBuilder *b = gtk_builder_new_from_file(GLISP_TOOLS_BASE "/repl.glade");
     gtk_builder_add_callback_symbols (b, "glisp_repl_key_pressed",G_CALLBACK(glisp_repl_key_pressed),NULL);
     gtk_builder_connect_signals(b,NULL);
+#endif
 
     ReplInfo.container = GTK_WIDGET(gtk_builder_get_object(b, "glisp_repl_parent"));
     ReplInfo.output = GTK_WIDGET(gtk_builder_get_object(b, "glisp_repl_output"));
@@ -35,6 +82,16 @@ void glispCreateReplUi()
     ReplInfo.input = GTK_WIDGET(gtk_builder_get_object(b, "glisp_repl_input"));
     ReplInfo.inputBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ReplInfo.input));
     ReplInfo.lastPosition = 1;
+
+#if GTK_MAJOR_VERSION < 3
+    static PangoFontDescription *monospace = NULL;
+    if(monospace == NULL) {
+        monospace = pango_font_description_new();
+    }
+    pango_font_description_set_family_static(monospace, "monospace");
+    gtk_widget_modify_font(ReplInfo.output, monospace);
+    gtk_widget_modify_font(ReplInfo.input, monospace);
+#endif
 
     g_timeout_add(250, replPoll, NULL);
 
@@ -49,6 +106,11 @@ static gboolean replPoll (G_GNUC_UNUSED gpointer user_data)
 {
 
     gchar *text = getOutputLines(ReplInfo.lastPosition);
+
+    if (text == NULL) {
+        return FALSE;
+    }
+
     ReplInfo.lastPosition += strlen(text);
 
     GtkTextIter end;
@@ -87,11 +149,16 @@ static gchar* getOutputLines(guint startPosition)
     argv[2] = arg2;
     
     GString *output = g_string_sized_new(1024);
-    if (! spawn_sync(NULL,NULL,argv,NULL,NULL,output, NULL, NULL, &E))
+    gint status;
+    if (! spawn_sync(NULL,NULL,argv,NULL,NULL,output, NULL, &status, &E))
     {
 
         g_assert(E);
-        fprintf(stderr, "Unable to get completions: %s\n",E->message);
+        fprintf(stderr, "Unable to get output: %s\n",E->message);
+        goto cleanup;
+    }
+    else if(status) {
+        fprintf(stderr, "Unable to get output: repl-output exited with status %d\n", status);
         goto cleanup;
     }
 

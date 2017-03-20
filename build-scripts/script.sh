@@ -67,5 +67,6 @@ cp ../utilities-src/quicklisp.lisp quicklisp.lisp
 cp ../utilities-src/slime-server.el slime-server.el
 cp ../geany-utilities/geany-utilities geany-utilities
 cp ../utilities-src/repl.glade repl.glade
+cp ../utilities-src/repl2.glade repl2.glade
 cd "$ROOT_DIR" || exit 1
 tar xpf build-scripts/git-ignore.tar
