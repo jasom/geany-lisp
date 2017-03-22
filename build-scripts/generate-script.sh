@@ -9,6 +9,7 @@ tup
 
 rm -f build-scripts/git-ignore.tar
 tar -cpf build-scripts/git-ignore.tar .gitignore
+rm -rf utilities/quicklisp
 find . -iname .gitignore -exec tar -rpf build-scripts/git-ignore.tar {} '+'
 git clean -fX
 tup generate --config generate.config script.sh
