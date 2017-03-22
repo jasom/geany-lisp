@@ -229,8 +229,7 @@ cleanup:
 
 static void openLispFiles(const gchar *projectDirectory)
 {
-    gchar *cwd = g_get_current_dir();
-    g_chdir(projectDirectory);
-    openLispFilesInternal("lisp");
-    g_free(cwd);
+    gchar *directory = g_build_filename(projectDirectory,"lisp",NULL);
+    openLispFilesInternal(directory);
+    g_free(directory);
 }
