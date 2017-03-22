@@ -32,6 +32,7 @@ void glispStopServer(void)
 
     gchar *argv[3] = {GLISP_UTILITY, "stop-lisp" , NULL};
 
+    glispDestroyReplUi();
 
 
     if (! spawn_sync(NULL,NULL, argv,NULL,NULL,NULL,NULL,NULL,&E))

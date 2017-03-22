@@ -27,6 +27,7 @@ gdk_event_get_keyval(GdkEvent *event, guint *keyval)
 
 
 static struct ReplInfo {
+    GtkWidget *builder;
     GtkWidget *container;
     GtkWidget *output;
     GtkWidget *prompt;
@@ -42,22 +43,6 @@ static gchar* getOutputLines(guint startPosition);
 static gchar* getPrompt();
 gboolean glisp_repl_key_pressed (G_GNUC_UNUSED GtkWidget *widget,
         GdkEvent  *event, G_GNUC_UNUSED gpointer user_data);
-#if GTK_MAJOR_VERSION < 3
-static void myConnectFunction(G_GNUC_UNUSED GtkBuilder *builder, GObject
-        *object, const gchar *signal_name, const gchar *handler_name, GObject
-        *connect_object, GConnectFlags flags, gpointer user_data)
-{
-    g_assert(!strcmp("glisp_repl_key_pressed", handler_name));
-
-    if(connect_object) {
-        g_signal_connect_object(object, signal_name, G_CALLBACK(glisp_repl_key_pressed), connect_object, flags);
-    }
-    else {
-        g_signal_connect(object, signal_name, G_CALLBACK(glisp_repl_key_pressed), user_data);
-    }
-}
-
-#endif
 
 void glispCreateReplUi()
 {
@@ -66,15 +51,16 @@ void glispCreateReplUi()
 
     GtkWidget* ReplTabLabel = gtk_label_new("REPL");
 
+
 #if GTK_MAJOR_VERSION < 3
     GtkBuilder *b = gtk_builder_new_from_file(GLISP_TOOLS_BASE "/repl2.glade");
-    gtk_builder_connect_signals_full(b,myConnectFunction, NULL);
 #else
     GtkBuilder *b = gtk_builder_new_from_file(GLISP_TOOLS_BASE "/repl.glade");
-    gtk_builder_add_callback_symbols (b, "glisp_repl_key_pressed",G_CALLBACK(glisp_repl_key_pressed),NULL);
-    gtk_builder_connect_signals(b,NULL);
 #endif
 
+    plugin_builder_connect_signals(geany_plugin, b, NULL);
+
+    ReplInfo.builder = GTK_WIDGET(b);
     ReplInfo.container = GTK_WIDGET(gtk_builder_get_object(b, "glisp_repl_parent"));
     ReplInfo.output = GTK_WIDGET(gtk_builder_get_object(b, "glisp_repl_output"));
     ReplInfo.outputBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ReplInfo.output));
@@ -101,9 +87,24 @@ void glispCreateReplUi()
 
 }
 
+void glispDestroyReplUi()
+{
+    if(ReplInfo.container == NULL) return;
+
+    gint idx = gtk_notebook_page_num(GTK_NOTEBOOK(geany_data->main_widgets->message_window_notebook),
+            ReplInfo.container);
+
+    gtk_notebook_remove_page(GTK_NOTEBOOK(geany_data->main_widgets->message_window_notebook), idx);
+
+    g_object_unref(ReplInfo.builder);
+    memset(&ReplInfo,0,sizeof(ReplInfo));
+
+}
 
 static gboolean replPoll (G_GNUC_UNUSED gpointer user_data)
 {
+
+    if(ReplInfo.container == NULL) return FALSE;
 
     gchar *text = getOutputLines(ReplInfo.lastPosition);
 
