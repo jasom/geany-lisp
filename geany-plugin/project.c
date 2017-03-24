@@ -119,6 +119,26 @@ void glispProjectSave(GKeyFile *config)
     g_key_file_set_string(config, "glisp", "asdf_file", ProjectInfo->asdfFile);
     g_key_file_set_string(config, "glisp", "system_name", ProjectInfo->systemName);
 
+
+    /* If it's a new project try to copy the filetypes.lisp */
+    if(ProjectInfo->newProject) {
+        gchar *lispConfig =
+            g_build_filename(geany_data->app->configdir, GEANY_FILEDEFS_SUBDIR, "filetypes.lisp", NULL);
+        if(!g_file_test(lispConfig, G_FILE_TEST_IS_REGULAR)) {
+            gchar *infName = g_build_filename(GLISP_TOOLS_BASE, "filetypes.lisp", NULL);
+            GFile* outf = g_file_new_for_path(lispConfig);
+            GFile* inf = g_file_new_for_path(infName);
+            GError *E = NULL;
+
+            if(!g_file_copy(inf,outf,G_FILE_COPY_NONE,NULL,NULL,NULL,&E)) {
+                g_assert(E);
+                fprintf(stderr, "Unable to copy filetypes: %s\n",E->message);
+            } else {
+                main_reload_configuration();
+            }
+        }
+    }
+
     /* If it's a new project, force an open */
     if(ProjectInfo->newProject) {
         destroyProjectInfo();

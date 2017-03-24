@@ -21,8 +21,9 @@ Installing
 * Enable the plugin from the geany plugin manager
 * Configure keybindings from the geany plugin manager
 * If you wish the "Compile" command to work, copy the `filetypes.lisp` to
-  `~/.config/geany/filedefs` I don't install this by default so as to not clobber any
-  existing customizations that may already be there.
+  `~/.config/geany/filedefs` If you do not currently have a filetypes.lisp
+  file in that directory, this will be done automatically the first time you
+  use the plugin.
 
 Current Features
 ----------------

@@ -35,9 +35,7 @@ alias tup='true &&' #this makes "tup varsed" act like "true && varsed"
 #! /bin/sh -e
 cd "geany-utilities"
 tup varsed quickproject.lisp.in quickproject.lisp
-cd ".."
-tup varsed filetypes.lisp.in filetypes.lisp
-cd "build-scripts"
+cd "../build-scripts"
 tup varsed install-quicklisp.sh.in install-quicklisp.sh
 tup varsed install.sh.in install.sh
 cd ".."
@@ -59,8 +57,10 @@ $CONFIG_CC -shared $CONFIG_CFLAGS -Wall -Wextra -Werror -fPIC $CONFIG_GEANY_CFLA
 cd "../test/utility-tests"
 tup varsed setupenv.in setupenv
 cd "../../utilities-src"
+tup varsed filetypes.lisp.in filetypes.lisp
 tup varsed glispinit.lisp.in glispinit.lisp
 cd "../utilities"
+cp ../utilities-src/filetypes.lisp filetypes.lisp
 cp ../utilities-src/glispinit.lisp glispinit.lisp
 cp ../utilities-src/glispinit2.lisp glispinit2.lisp
 cp ../utilities-src/quicklisp.lisp quicklisp.lisp
