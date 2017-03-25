@@ -34,12 +34,10 @@ static struct ReplInfo {
     GtkWidget *input;
     GtkTextBuffer *outputBuffer;
     GtkTextBuffer *inputBuffer;
-    guint lastPosition;
 
 } ReplInfo;
 
-static gboolean replPoll (gpointer user_data);
-static gchar* getOutputLines(guint startPosition);
+static void getOutputLines();
 static gchar* getPrompt();
 gboolean glisp_repl_key_pressed (G_GNUC_UNUSED GtkWidget *widget,
         GdkEvent  *event, G_GNUC_UNUSED gpointer user_data);
@@ -67,7 +65,6 @@ void glispCreateReplUi()
     ReplInfo.prompt = GTK_WIDGET(gtk_builder_get_object(b, "glisp_repl_prompt"));
     ReplInfo.input = GTK_WIDGET(gtk_builder_get_object(b, "glisp_repl_input"));
     ReplInfo.inputBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ReplInfo.input));
-    ReplInfo.lastPosition = 1;
 
 #if GTK_MAJOR_VERSION < 3
     static PangoFontDescription *monospace = NULL;
@@ -79,12 +76,11 @@ void glispCreateReplUi()
     gtk_widget_modify_font(ReplInfo.input, monospace);
 #endif
 
-    g_timeout_add(250, replPoll, NULL);
-
     gtk_notebook_append_page(GTK_NOTEBOOK(geany_data->main_widgets->message_window_notebook),
             ReplInfo.container, ReplTabLabel);
     gtk_widget_show_all(ReplInfo.container);
 
+    getOutputLines();
 }
 
 void glispDestroyReplUi()
@@ -101,18 +97,33 @@ void glispDestroyReplUi()
 
 }
 
-static gboolean replPoll (G_GNUC_UNUSED gpointer user_data)
+
+
+static void accumulateOutput(GString *instring, GIOCondition condition, gpointer data)
 {
+    GString *accum = data;
+    if (condition & (G_IO_IN | G_IO_PRI)) {
+        g_string_append(accum, instring->str);
+    }
+}
 
-    if(ReplInfo.container == NULL) return FALSE;
+static void finishOutputLines(G_GNUC_UNUSED GPid pid, gint status, gpointer data)
+{
+    GString *accum = (GString *)data;
 
-    gchar *text = getOutputLines(ReplInfo.lastPosition);
-
-    if (text == NULL) {
-        return FALSE;
+    if(status != 0) {
+        fprintf(stderr, "Unable to get output: repl-output exited with status %d\n", status);
+        g_string_free(accum, TRUE);
+        return;
     }
 
-    ReplInfo.lastPosition += strlen(text);
+    if(ReplInfo.container == NULL) return;
+
+    gchar *text = g_string_free(accum, FALSE);
+
+    if (text == NULL) {
+        return;
+    }
 
     GtkTextIter end;
 
@@ -136,38 +147,38 @@ static gboolean replPoll (G_GNUC_UNUSED gpointer user_data)
 
     g_free(text);
 
-    return TRUE;
+    getOutputLines();
+
+    return;
 }
+    
 
-static gchar* getOutputLines(guint startPosition)
+
+static void getOutputLines()
 {
-    gchar *argv[4] = {GLISP_UTILITY,"repl-output",NULL, NULL};
+    gchar *argv[3] = {GLISP_UTILITY,"repl-output", NULL};
 
-    gchar *arg2 = g_strdup_printf("%u",startPosition);
-    gchar *result = NULL;
     GError *E=NULL;
 
-    argv[2] = arg2;
-    
     GString *output = g_string_sized_new(1024);
-    gint status;
-    if (! spawn_sync(NULL,NULL,argv,NULL,NULL,output, NULL, &status, &E))
-    {
+
+    if (! spawn_with_callbacks 	(NULL, NULL,
+                argv, NULL, 0,
+                NULL,NULL,
+                accumulateOutput, output,
+                0, NULL, NULL, 0,
+                finishOutputLines, output,
+                NULL, &E)) {
 
         g_assert(E);
         fprintf(stderr, "Unable to get output: %s\n",E->message);
         goto cleanup;
     }
-    else if(status) {
-        fprintf(stderr, "Unable to get output: repl-output exited with status %d\n", status);
-        goto cleanup;
-    }
 
-    result = g_string_free(output,FALSE);
 
 cleanup:
     g_clear_error(&E);
-    return result;
+    return;
 }
 
 static gchar* getPrompt()

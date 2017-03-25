@@ -1,10 +1,14 @@
 (in-package #:geany-utilities)
 
-(defun repl-output (start-position)
-  (declare (ignore start-position))
-  (let ((raw-result
-          (emacs-eval "(ss-output-text)")))
-    (unescape-bytes raw-result *standard-output*)))
+(defun repl-output ()
+  (loop
+    (let ((raw-result
+            (emacs-eval "(ss-output-text)")))
+      (unless (= 3 (length raw-result))
+        (format *error-output* "repl-done ~A~%" (length raw-result))
+        (unescape-bytes raw-result *standard-output*)
+        (return-from repl-output)))
+    (sleep 0.25)))
 
 (defun repl-prompt ()
   (let ((raw-result
