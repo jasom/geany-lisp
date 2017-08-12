@@ -8,9 +8,9 @@ glispTMPDIR="/tmp/glisptmp-$(echo "$PWD"|sha1sum|cut -d' ' -f1)"
 tup
 
 rm -f build-scripts/git-ignore.tar
-tar -cpf build-scripts/git-ignore.tar .gitignore
+tar -cpf build-scripts/git-ignore.tar --mtime='1970-01-01Z' .gitignore
 rm -rf utilities/quicklisp
-find . -iname .gitignore -exec tar -rpf build-scripts/git-ignore.tar {} '+'
+find . -iname .gitignore -exec tar -rpf build-scripts/git-ignore.tar --mtime='1970-01-01Z' {} '+'
 git clean -fX
 tup generate --config generate.config script.sh
 cat build-scripts/script-header.sh script.sh build-scripts/script-footer.sh> build-scripts/script.sh
