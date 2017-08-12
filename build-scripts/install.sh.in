@@ -1,7 +1,12 @@
-PLUGINS="$(echo geany-plugin/*.so)"
+install -d "@INSTALL_DIR@"
+install -d "@GEANY_PLUGIN_DIR@"
 
-mkdir -p "@INSTALL_DIR@"
-mkdir -p "@GEANY_PLUGIN_DIR@"
-
-tar -C utilities --exclude=Tupfile --exclude=.gitignore -cp .|tar -C "@INSTALL_DIR@" -xpv
-cp $PLUGINS "@GEANY_PLUGIN_DIR@"
+(
+cd utilities || exit 1
+find . -type d -exec install -d -v "@INSTALL_DIR@/{}" \;
+find . \! -name Tupfile \! -name .gitignore -type f -perm -0700 -exec install -v {} "@INSTALL_DIR@/{}" \;
+find . \! -name Tupfile \! -name .gitignore -type f \! -perm -0700 -exec install -m 644 -v {} "@INSTALL_DIR@/{}" \;
+)
+for plugin in geany-plugin/*.so; do
+    install -C -v "$plugin" "@GEANY_PLUGIN_DIR@"
+done
