@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if ! test -e ./tup.config; then
+    echo "Must run ./configure first" >&2
+    exit 1
+fi
+
+sh build-scripts/build.sh
+tar -C utilities -xf quicklisp.tgz

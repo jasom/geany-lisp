@@ -6,7 +6,7 @@ Geany Development Plugin for Common Lisp
 Requirements
 ------------
 
-* Linux (may work on other *nix, but is untested)
+* Linux (may work on other \*nix, but is untested)
 * [[http://geany.org/ | geany]] the oldest version I've tested with is 1.26
 * You will need the plugin-dev headers for the above as well.
 * A lisp executable (currently only tested with sbcl)
@@ -17,7 +17,12 @@ Requirements
 Installing
 ----------
 
-* `make config PREFIX=$HOME; make install`
+```
+PREFIX=$HOME ./configure
+./build
+./install
+```
+
 * Enable the plugin from the geany plugin manager
 * Configure keybindings from the geany plugin manager
 * If you wish the "Compile" command to work, copy the `filetypes.lisp` to
