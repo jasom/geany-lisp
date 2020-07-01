@@ -2,7 +2,7 @@ include_rules
 
 include $(TOP)/includeme.tup
 
-CFLAGS=@(CFLAGS) -Wall -Wextra -Werror -fPIC @(GEANY_CFLAGS)
+CFLAGS=@(CFLAGS) -Wall -Wextra -Werror -Wno-error=deprecated-declarations -fPIC @(GEANY_CFLAGS)
 LDFLAGS=-shared
 
 : foreach *.c | local.h |> @(CC) $(CFLAGS) -c -o %o %f |> %B.o

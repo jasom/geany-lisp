@@ -1,4 +1,5 @@
 set -e
+set -x
 
 export glispTMPDIR;
 #Using a consistent path for quicklisp means the ASDF cache can work
@@ -7,7 +8,7 @@ glispTMPDIR="/tmp/glisptmp-$(echo "$PWD"|sha1sum|cut -d' ' -f1)"
 
 mkdir -p "$glispTMPDIR"
 
-if which tup; then
+if command -v tup; then
     tup
 else
     echo "Tup not installed, falling back on manual build" >&2
