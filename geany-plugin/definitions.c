@@ -25,6 +25,12 @@ static void deleteSymbolLocation(SymbolLocation *s)
     g_free(s);
 }
 
+/* A simple GCLosureNotify compatible wrapper around deleteSymbolLocation */
+static void deleteSymbolLocationNotify(SymbolLocation *s, __attribute__((unused))GClosure *c)
+{
+    deleteSymbolLocation(s);
+}
+
 static gboolean readSymbolLocation(GPtrArray *input, guint *idx, GPtrArray *output)
 {
     SymbolLocation *s = newSymbolLocation();
@@ -200,7 +206,7 @@ static void show_goto_popup(GeanyDocument *doc, GPtrArray *tags, gboolean have_b
                 //label = g_object_new(GTK_TYPE_LABEL, "label", text, "use-markup", TRUE, "xalign", 0.0, NULL);
                 item = g_object_new(GTK_TYPE_MENU_ITEM, "label", text, NULL);
                 g_signal_connect_data(item, "activate", G_CALLBACK(on_goto_popup_item_activate),
-                                      sl, (GClosureNotify) deleteSymbolLocation, 0);
+                                      sl, (GClosureNotify) deleteSymbolLocationNotify, 0);
                 gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
                 if (! first)
