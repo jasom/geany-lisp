@@ -26,7 +26,7 @@ run_lisp <<EOF
      while line
      do 
          (asdf:load-asd (uiop:merge-pathnames* line (truename "$glispTMPDIR/quicklisp/"))))))
-(asdf:load-asd "geany-utilities.asd")
+(asdf:load-asd (truename "geany-utilities.asd"))
 (asdf:load-system :geany-utilities)
 (setf uiop/image:*image-entry-point* 'geany-utilities::entry-point)
 (uiop/image:dump-image "geany-utilities" :executable t)
